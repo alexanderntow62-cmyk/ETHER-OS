@@ -1,17 +1,29 @@
-# test_app
+#
+# ETHER-OS
 
-A new Flutter project.
+## AI Operating System Built with Flutter
+
+ETHER-OS is an experimental AI-powered operating system interface built with Flutter. It is designed to explore intelligent assistance, modern UI design, and cross-platform experiences.
+
+## Features
+
+- 🤖 AI assistant integration
+
+- 🖥️ Futuristic operating system interface
+- 📱 Android support
+- 💻 Windows, Linux, macOS and Web support
+- ⚡ Fast Flutter-based performance
+- 🔐 Secure architecture foundation
+
+## Built With
+
+- Flutter
+- Dart
+- Git & GitHub
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+### Install dependencies
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter pub get
