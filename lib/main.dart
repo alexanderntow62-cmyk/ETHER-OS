@@ -1,121 +1,730 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'agent/ether_agent.dart';
+import 'ai/ether_voice.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const EtherOS());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class EtherOS extends StatelessWidget {
+  const EtherOS({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+      debugShowCheckedModeBanner: false,
+      title: 'ETHER-OS',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF05070D),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00E5FF),
+          secondary: Color(0xFF7C4DFF),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const EtherHome(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class EtherHome extends StatefulWidget {
+  const EtherHome({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<EtherHome> createState() => _EtherHomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _EtherHomeState extends State<EtherHome> {
+  int selectedIndex = 0;
+  final EtherAgent _etherAgent = EtherAgent();
+  final EtherVoice _voice = EtherVoice();
+  bool _isListening = false;
+  final TextEditingController _aiController = TextEditingController();
+  final ScrollController _chatScrollController = ScrollController();
+  final List<Map<String, String>> _chatMessages = [
+    {'role': 'ether', 'text': 'Ether AI Core is connected and ready.'},
+  ];
+  bool _isThinking = false;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  final List<String> sections = ['CORE', 'AI', 'BUSINESS', 'SYSTEM'];
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      body: SafeArea(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
           children: [
-            const Text('You have pushed the button this many times:'),
+            _topBar(),
+            Expanded(child: _content()),
+            _bottomNavigation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _topBar() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 18, 20, 12),
+      child: Row(
+        children: [
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF00E5FF), width: 1.5),
+            ),
+            child: const Icon(
+              Icons.hub_outlined,
+              color: Color(0xFF00E5FF),
+              size: 26,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ETHER-OS',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'INTELLIGENT OPERATING SYSTEM',
+                  style: TextStyle(
+                    fontSize: 9,
+                    letterSpacing: 1.4,
+                    color: Colors.white54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFF00E5FF).withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: const Color(0xFF00E5FF).withValues(alpha: 0.35),
+              ),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.circle, size: 8, color: Color(0xFF00E5FF)),
+                SizedBox(width: 6),
+                Text(
+                  'ONLINE',
+                  style: TextStyle(
+                    fontSize: 9,
+                    letterSpacing: 1.2,
+                    color: Color(0xFF00E5FF),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _content() {
+    switch (selectedIndex) {
+      case 1:
+        return _aiPanel();
+      case 2:
+        return _businessPanel();
+      case 3:
+        return _systemPanel();
+      default:
+        return _corePanel();
+    }
+  }
+
+  Widget _corePanel() {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      children: [
+        _heroCard(),
+        const SizedBox(height: 16),
+        _sectionTitle('SYSTEM OVERVIEW'),
+        const SizedBox(height: 10),
+        _infoCard(
+          Icons.memory,
+          'ETHER CORE',
+          'Core intelligence engine ready.',
+        ),
+        _infoCard(Icons.auto_awesome, 'AI STATUS', 'AI subsystem initialized.'),
+        _infoCard(
+          Icons.business_center,
+          'BUSINESS ENGINE',
+          'Business automation layer ready.',
+        ),
+      ],
+    );
+  }
+
+  Widget _heroCard() {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF00E5FF).withValues(alpha: 0.25),
+        ),
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF00E5FF).withValues(alpha: 0.12),
+            const Color(0xFF7C4DFF).withValues(alpha: 0.08),
+          ],
+        ),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.hub_outlined, color: Color(0xFF00E5FF), size: 38),
+          SizedBox(height: 16),
+          Text(
+            'WELCOME TO ETHER',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'An intelligent operating system designed to connect AI, business automation, and system intelligence.',
+            style: TextStyle(color: Colors.white60, height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _aiPanel() {
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _chatScrollController,
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+            itemCount: _chatMessages.length + (_isThinking ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (_isThinking && index == _chatMessages.length) {
+                return _chatBubble(
+                  role: 'ether',
+                  text: 'ETHER is thinking...',
+                  thinking: true,
+                );
+              }
+
+              final message = _chatMessages[index];
+
+              return _chatBubble(
+                role: message['role'] ?? 'ether',
+                text: message['text'] ?? '',
+              );
+            },
+          ),
+        ),
+        _chatInput(),
+      ],
+    );
+  }
+
+  Widget _chatBubble({
+    required String role,
+    required String text,
+    bool thinking = false,
+  }) {
+    final isUser = role == 'user';
+
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 340),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isUser
+              ? const Color(0xFF00E5FF).withValues(alpha: 0.10)
+              : const Color(0xFF0B0F18),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isUser
+                ? const Color(0xFF00E5FF).withValues(alpha: 0.30)
+                : Colors.white.withValues(alpha: 0.08),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
+          children: [
             Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              isUser ? 'YOU' : 'ETHER',
+              style: TextStyle(
+                color: isUser
+                    ? const Color(0xFF00E5FF)
+                    : const Color(0xFF7C4DFF),
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.4,
+              ),
+            ),
+            const SizedBox(height: 7),
+            Text(
+              text,
+              style: TextStyle(
+                color: thinking ? Colors.white38 : Colors.white70,
+                height: 1.5,
+                fontStyle: thinking ? FontStyle.italic : FontStyle.normal,
+              ),
+            ),
+            if (!thinking) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: isUser
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!isUser)
+                      IconButton(
+                        tooltip: 'Speak',
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 36,
+                          minHeight: 36,
+                        ),
+                        icon: const Icon(
+                          Icons.volume_up_rounded,
+                          size: 18,
+                          color: Colors.white54,
+                        ),
+                        onPressed: () => _speakEther(text),
+                      ),
+                    IconButton(
+                      tooltip: 'Copy',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      icon: const Icon(
+                        Icons.copy_rounded,
+                        size: 18,
+                        color: Colors.white54,
+                      ),
+                      onPressed: () async {
+                        await Clipboard.setData(ClipboardData(text: text));
+
+                        if (!mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Copied to clipboard'),
+                            duration: Duration(milliseconds: 900),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _chatInput() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF05070D),
+        border: Border(
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _aiController,
+                minLines: 1,
+                maxLines: 4,
+                textInputAction: TextInputAction.send,
+                enabled: !_isThinking,
+                decoration: InputDecoration(
+                  hintText: 'Talk to Ether AI...',
+                  filled: true,
+                  fillColor: const Color(0xFF0B0F18),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13,
+                  ),
+                ),
+                onSubmitted: (_) => _sendToEtherAI(),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const SizedBox(width: 2),
+            IconButton(
+              tooltip: _isListening ? 'Stop listening' : 'Voice input',
+              onPressed: _isThinking ? null : _toggleListening,
+              icon: Icon(
+                _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+              ),
+              color: _isListening
+                  ? const Color(0xFFFF5252)
+                  : const Color(0xFF00E5FF),
+              iconSize: 26,
+            ),
+            IconButton(
+              onPressed: _isThinking ? null : _sendToEtherAI,
+              icon: const Icon(Icons.send_rounded),
+              color: const Color(0xFF00E5FF),
+              iconSize: 28,
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    );
+  }
+
+  Future<void> _toggleListening() async {
+    if (_isListening) {
+      await _voice.stopListening();
+
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = false;
+      });
+
+      return;
+    }
+
+    final ready = await _voice.initialize(
+      onStatus: (status) {
+        if (!mounted) return;
+
+        if (status == 'notListening' || status == 'done') {
+          setState(() {
+            _isListening = false;
+          });
+        }
+      },
+      onError: (error) {
+        if (!mounted) return;
+
+        setState(() {
+          _isListening = false;
+        });
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Voice error: $error')));
+      },
+    );
+
+    if (!ready) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Microphone is not available.')),
+      );
+
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isListening = true;
+    });
+
+    await _voice.startListening(
+      onResult: (text, finalResult) {
+        if (!mounted) return;
+
+        setState(() {
+          _aiController.text = text;
+          _aiController.selection = TextSelection.fromPosition(
+            TextPosition(offset: _aiController.text.length),
+          );
+        });
+
+        if (finalResult) {
+          setState(() {
+            _isListening = false;
+          });
+        }
+      },
+    );
+  }
+
+  Future<void> _speakEther(String text) async {
+    await _voice.speak(text);
+  }
+
+  Future<void> _sendToEtherAI() async {
+    final message = _aiController.text.trim();
+
+    if (message.isEmpty || _isThinking) {
+      return;
+    }
+
+    _aiController.clear();
+
+    setState(() {
+      _chatMessages.add({'role': 'user', 'text': message});
+      _isThinking = true;
+    });
+
+    await _scrollChatToBottom();
+
+    try {
+      final response = await _etherAgent.run(message);
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _chatMessages.add({'role': 'ether', 'text': response});
+        _isThinking = false;
+      });
+
+      await _scrollChatToBottom();
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _chatMessages.add({
+          'role': 'ether',
+          'text': 'I encountered an error while processing that request.',
+        });
+        _isThinking = false;
+      });
+
+      await _scrollChatToBottom();
+    }
+  }
+
+  Future<void> _scrollChatToBottom() async {
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    if (!_chatScrollController.hasClients) {
+      return;
+    }
+
+    await _chatScrollController.animateTo(
+      _chatScrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
+  }
+
+  Widget _businessPanel() {
+    return _simplePanel(
+      Icons.business_center_outlined,
+      'BUSINESS',
+      'Manage autonomous business operations from ETHER-OS.',
+      'BUSINESS ENGINE READY',
+    );
+  }
+
+  Widget _systemPanel() {
+    return _simplePanel(
+      Icons.settings_outlined,
+      'SYSTEM',
+      'System controls, security, storage, and connected services.',
+      'SYSTEM ONLINE',
+    );
+  }
+
+  Widget _simplePanel(
+    IconData icon,
+    String title,
+    String description,
+    String status,
+  ) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: const Color(0xFF00E5FF).withValues(alpha: 0.25),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: const Color(0xFF00E5FF), size: 42),
+              const SizedBox(height: 20),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                style: const TextStyle(color: Colors.white60, height: 1.5),
+              ),
+              const SizedBox(height: 22),
+              Text(
+                status,
+                style: const TextStyle(
+                  color: Color(0xFF00E5FF),
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.3,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _sectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 11,
+        letterSpacing: 1.6,
+        color: Colors.white54,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _infoCard(IconData icon, String title, String subtitle) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.035),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF00E5FF)),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(fontSize: 12, color: Colors.white54),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bottomNavigation() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B0F18),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: List.generate(sections.length, (index) {
+          final selected = selectedIndex == index;
+
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFF00E5FF).withValues(alpha: 0.1)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      [
+                        Icons.dashboard_outlined,
+                        Icons.auto_awesome,
+                        Icons.business_center_outlined,
+                        Icons.settings_outlined,
+                      ][index],
+                      size: 20,
+                      color: selected
+                          ? const Color(0xFF00E5FF)
+                          : Colors.white54,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      sections[index],
+                      style: TextStyle(
+                        fontSize: 8,
+                        letterSpacing: 0.8,
+                        color: selected
+                            ? const Color(0xFF00E5FF)
+                            : Colors.white54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

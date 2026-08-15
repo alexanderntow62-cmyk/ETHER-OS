@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="test_app"
+        android:label="ETHER-OS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
