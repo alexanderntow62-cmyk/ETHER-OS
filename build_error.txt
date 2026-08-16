@@ -1,0 +1,33 @@
+   Woah! You appear to be trying to run flutter as root.
+   We strongly recommend running the flutter tool without superuser privileges.
+  /
+📎
+Running Gradle task 'assembleDebug'...                          
+   Woah! You appear to be trying to run flutter as root.
+   We strongly recommend running the flutter tool without superuser privileges.
+  /
+????
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:processDebugResources'.
+> Could not resolve all files for configuration ':app:debugRuntimeClasspath'.
+   > Failed to transform appcompat-1.1.0.aar (androidx.appcompat:appcompat:1.1.0) to match attributes {artifactType=android-compiled-dependencies-resources, org.gradle.category=library, org.gradle.libraryelements=jar, org.gradle.status=release, org.gradle.usage=java-runtime}.
+      > Execution failed for AarResourcesCompilerTransform: /root/.gradle/caches/9.1.0/transforms/57dca2b2757947e2ad734f898c9e0116/transformed/appcompat-1.1.0.
+         > AAPT2 aapt2-9.0.1-14304508-linux Daemon #1: Daemon startup failed
+           This should not happen under normal circumstances, please file an issue if it does.
+   > Failed to transform core-1.13.1.aar (androidx.core:core:1.13.1) to match attributes {artifactType=android-compiled-dependencies-resources, org.gradle.category=library, org.gradle.dependency.bundling=external, org.gradle.libraryelements=aar, org.gradle.status=release, org.gradle.usage=java-runtime}.
+      > Execution failed for AarResourcesCompilerTransform: /root/.gradle/caches/9.1.0/transforms/cb424bdb6e44a5e49041687d4e524877/transformed/core-1.13.1.
+         > AAPT2 aapt2-9.0.1-14304508-linux Daemon #0: Daemon startup failed
+           This should not happen under normal circumstances, please file an issue if it does.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to generate a Build Scan (Powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 23s
+Running Gradle task 'assembleDebug'...                             23.7s
+Gradle task assembleDebug failed with exit code 1

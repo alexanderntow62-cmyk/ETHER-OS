@@ -1,15 +1,10 @@
 import '../ai/brain/ether_brain.dart';
-import '../business/ether_business_engine.dart';
-import '../business/ether_business_operator.dart';
 import 'ether_executor.dart';
 import 'ether_plan.dart';
 import 'ether_planner.dart';
 
 class EtherAgent {
   final EtherBrain brain;
-  final EtherBusinessEngine business;
-  final EtherBusinessOperator businessOperator;
-
   late final EtherPlanner planner;
   late final EtherExecutor executor;
 
@@ -17,12 +12,7 @@ class EtherAgent {
 
   EtherAgent({
     EtherBrain? brain,
-    EtherBusinessEngine? business,
-    EtherBusinessOperator? businessOperator,
-  })  : brain = brain ?? EtherBrain(),
-        business = business ?? EtherBusinessEngine(),
-        businessOperator =
-            businessOperator ?? EtherBusinessOperator() {
+  }) : brain = brain ?? EtherBrain() {
     planner = EtherPlanner();
     executor = EtherExecutor(brain: this.brain);
   }
@@ -43,12 +33,6 @@ class EtherAgent {
 
     if (input.isEmpty) {
       return 'ETHER Agent is ready. Give me a goal.';
-    }
-
-    final intent = brain.intents.classify(input);
-
-    if (intent.isBusinessAction) {
-      return businessOperator.start(input);
     }
 
     final EtherPlan plan = planner.createPlan(input);

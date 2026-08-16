@@ -1,6 +1,5 @@
 import '../ai/brain/ether_brain.dart';
 import '../business/ether_business_engine.dart';
-import '../business/ether_business_operator.dart';
 import 'ether_executor.dart';
 import 'ether_plan.dart';
 import 'ether_planner.dart';
@@ -8,21 +7,15 @@ import 'ether_planner.dart';
 class EtherAgent {
   final EtherBrain brain;
   final EtherBusinessEngine business;
-  final EtherBusinessOperator businessOperator;
 
   late final EtherPlanner planner;
   late final EtherExecutor executor;
 
   bool _initialized = false;
 
-  EtherAgent({
-    EtherBrain? brain,
-    EtherBusinessEngine? business,
-    EtherBusinessOperator? businessOperator,
-  })  : brain = brain ?? EtherBrain(),
-        business = business ?? EtherBusinessEngine(),
-        businessOperator =
-            businessOperator ?? EtherBusinessOperator() {
+  EtherAgent({EtherBrain? brain, EtherBusinessEngine? business})
+    : brain = brain ?? EtherBrain(),
+      business = business ?? EtherBusinessEngine() {
     planner = EtherPlanner();
     executor = EtherExecutor(brain: this.brain);
   }
@@ -45,10 +38,11 @@ class EtherAgent {
       return 'ETHER Agent is ready. Give me a goal.';
     }
 
-    final intent = brain.intents.classify(input);
+    final lower = input.toLowerCase();
 
-    if (intent.isBusinessAction) {
-      return businessOperator.start(input);
+    // Route business requests through the Business Engine.
+    if (_isBusinessRequest(lower)) {
+      return _runBusinessRequest(input);
     }
 
     final EtherPlan plan = planner.createPlan(input);
@@ -68,9 +62,7 @@ class EtherAgent {
     ];
 
     for (final task in completedPlan.tasks) {
-      lines.add(
-        '${task.id} — ${task.status.name.toUpperCase()}',
-      );
+      lines.add('${task.id} — ${task.status.name.toUpperCase()}');
       lines.add('  ${task.goal}');
 
       if (task.result.isNotEmpty) {
@@ -87,5 +79,40 @@ class EtherAgent {
     }
 
     return lines.join('\n');
+  }
+
+  bool _isBusinessRequest(String input) {
+    const businessTerms = [
+      'business',
+      'dropshipping',
+      'drop shipping',
+      'product research',
+      'sell products',
+      'selling products',
+      'store',
+      'supplier',
+      'revenue',
+      'business plan',
+    ];
+
+    return businessTerms.any(input.contains);
+  }
+
+  Future<String> _runBusinessRequest(String goal) async {
+    final task = business.createTask(
+      id: 'business_${business.tasks.length + 1}',
+      goal: goal,
+    );
+
+    final result = await business.execute(task);
+
+    return 'ETHER BUSINESS ENGINE\n'
+        '\n'
+        'Goal: $goal\n'
+        '\n'
+        'Task: ${task.id}\n'
+        'Permission: ${task.permission.name.toUpperCase()}\n'
+        'Status: ${task.status.name.toUpperCase()}\n'
+        'Result: $result';
   }
 }

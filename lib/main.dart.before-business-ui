@@ -39,11 +39,6 @@ class _EtherHomeState extends State<EtherHome> {
   int selectedIndex = 0;
   final EtherAgent _etherAgent = EtherAgent();
   final EtherVoice _voice = EtherVoice();
-  final BusinessControlCenter _businessControlCenter =
-      BusinessControlCenter();
-  final TextEditingController _businessGoalController =
-      TextEditingController();
-  bool _businessRunning = false;
   bool _isListening = false;
   final TextEditingController _aiController = TextEditingController();
   final ScrollController _chatScrollController = ScrollController();
@@ -553,241 +548,12 @@ class _EtherHomeState extends State<EtherHome> {
   }
 
   Widget _businessPanel() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      children: [
-        _sectionTitle('BUSINESS CONTROL CENTER'),
-        const SizedBox(height: 10),
-
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(0xFF00E5FF).withValues(alpha: 0.25),
-            ),
-            color: const Color(0xFF0B0F18),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Icon(
-                    Icons.business_center_outlined,
-                    color: Color(0xFF00E5FF),
-                    size: 28,
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'BUSINESS OPERATOR',
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              TextField(
-                controller: _businessGoalController,
-                enabled: !_businessRunning,
-                minLines: 2,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: 'Enter a business goal...',
-                  filled: true,
-                  fillColor: const Color(0xFF05070D),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _businessRunning
-                      ? null
-                      : _runBusinessControlCenter,
-                  icon: _businessRunning
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.play_arrow_rounded),
-                  label: Text(
-                    _businessRunning
-                        ? 'BUSINESS CHECK RUNNING...'
-                        : 'RUN BUSINESS CHECK',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        _infoCard(
-          Icons.speed,
-          'WORKER STATUS',
-          _businessControlCenter.worker.isRunning
-              ? 'AUTONOMOUS WORKER RUNNING'
-              : 'WORKER IDLE',
-        ),
-
-        _infoCard(
-          Icons.storefront_outlined,
-          'REGISTERED BUSINESSES',
-          _businessControlCenter.businesses.isEmpty
-              ? 'No businesses registered.'
-              : _businessControlCenter.businesses.join(', '),
-        ),
-
-        _infoCard(
-          Icons.pending_actions_outlined,
-          'APPROVAL QUEUE',
-          '${_businessControlCenter.approvalQueue.pendingCount} item(s) need your attention.',
-          onTap: _showApprovalQueue,
-          enabled: _businessControlCenter.approvalQueue.pendingCount > 0,
-        ),
-
-        const SizedBox(height: 8),
-        _sectionTitle('ACTIVITY'),
-        const SizedBox(height: 10),
-
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: const Color(0xFF0B0F18),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-            ),
-          ),
-          child: Text(
-            _businessControlCenter.activity.isEmpty
-                ? 'No business activity yet.'
-                : _businessControlCenter.activity
-                    .takeLast(10)
-                    .map((entry) => '• $entry')
-                    .join('\n'),
-            style: const TextStyle(
-              color: Colors.white70,
-              height: 1.5,
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: const Color(0xFFFFC107).withValues(alpha: 0.25),
-            ),
-          ),
-          child: const Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.security_outlined,
-                color: Color(0xFFFFC107),
-              ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'FINANCIAL SAFETY\n'
-                  'ETHER cannot spend money, make purchases, '
-                  'or create financial commitments autonomously. '
-                  'Financial actions require your approval.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return _simplePanel(
+      Icons.business_center_outlined,
+      'BUSINESS',
+      'Manage autonomous business operations from ETHER-OS.',
+      'BUSINESS ENGINE READY',
     );
-  }
-
-  Future<void> _runBusinessControlCenter() async {
-    final goal = _businessGoalController.text.trim();
-
-    if (goal.isEmpty || _businessRunning) {
-      return;
-    }
-
-    setState(() {
-      _businessRunning = true;
-    });
-
-    try {
-      final result =
-          await _businessControlCenter.runBusinessCheck(goal);
-
-      if (!mounted) {
-        return;
-      }
-
-      _businessGoalController.clear();
-
-      showDialog<void>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('ETHER BUSINESS RESULT'),
-            content: SingleChildScrollView(
-              child: Text(
-                result,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  height: 1.5,
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('CLOSE'),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Business error: $error'),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _businessRunning = false;
-        });
-      }
-    }
   }
 
   Widget _systemPanel() {
@@ -863,182 +629,14 @@ class _EtherHomeState extends State<EtherHome> {
     );
   }
 
-  void _showApprovalQueue() {
-    final queue = _businessControlCenter.approvalQueue;
-
-    if (queue.items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No approval requests pending.'),
-        ),
-      );
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF0B0F18),
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'APPROVAL QUEUE',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${queue.pendingCount} item(s) need your attention.',
-                  style: const TextStyle(
-                    color: Colors.white54,
-                  ),
-                ),
-                const SizedBox(height: 18),
-
-                ...queue.items.map(
-                  (task) => Container(
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF05070D),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFFFC107)
-                            .withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'APPROVAL REQUIRED',
-                          style: TextStyle(
-                            color: Color(0xFFFFC107),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          task.goal,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Permission: ${task.permission.name}',
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  final approved = await
-                                      _businessControlCenter.approve(task);
-
-                                  Navigator.pop(sheetContext);
-
-                                  if (approved && mounted) {
-                                    setState(() {});
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Business action approved.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.check_rounded,
-                                ),
-                                label: const Text('APPROVE'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  final rejected =
-                                      _businessControlCenter.reject(task);
-
-                                  Navigator.pop(sheetContext);
-
-                                  if (rejected && mounted) {
-                                    setState(() {});
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Business action rejected.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.close_rounded,
-                                ),
-                                label: const Text('REJECT'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
-  Widget _infoCard(
-    IconData icon,
-    String title,
-    String subtitle, {
-    VoidCallback? onTap,
-    bool enabled = false,
-  }) {
-    final card = Container(
+  Widget _infoCard(IconData icon, String title, String subtitle) {
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.035),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: enabled
-              ? const Color(0xFF00E5FF).withValues(alpha: 0.30)
-              : Colors.white.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Row(
         children: [
@@ -1058,30 +656,13 @@ class _EtherHomeState extends State<EtherHome> {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white54,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white54),
                 ),
               ],
             ),
           ),
-          if (enabled)
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Colors.white54,
-            ),
         ],
       ),
-    );
-
-    if (onTap == null) {
-      return card;
-    }
-
-    return GestureDetector(
-      onTap: onTap,
-      child: card,
     );
   }
 
@@ -1147,19 +728,5 @@ class _EtherHomeState extends State<EtherHome> {
         }),
       ),
     );
-  }
-}
-
-extension<T> on List<T> {
-  Iterable<T> takeLast(int count) {
-    if (count <= 0) {
-      return const [];
-    }
-
-    if (length <= count) {
-      return this;
-    }
-
-    return sublist(length - count);
   }
 }

@@ -1,0 +1,23 @@
+import '../ai/brain/ether_brain.dart';
+
+class EtherAgent {
+  final EtherBrain brain;
+
+  EtherAgent({
+    EtherBrain? brain,
+  }) : brain = brain ?? EtherBrain();
+
+  Future<void> initialize() async {
+    await brain.initialize();
+  }
+
+  Future<String> run(String goal) async {
+    final input = goal.trim();
+
+    if (input.isEmpty) {
+      return 'ETHER Agent is ready. Give me a goal.';
+    }
+
+    return brain.think(input);
+  }
+}

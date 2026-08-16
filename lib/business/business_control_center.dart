@@ -78,12 +78,23 @@ class BusinessControlCenter {
     ].join('\n');
   }
 
-  bool approve(BusinessTask task) {
+  Future<bool> approve(BusinessTask task) async {
     if (!approvalQueue.items.contains(task)) {
       return false;
     }
 
+    if (task.status != BusinessTaskStatus.waitingApproval) {
+      return false;
+    }
+
     approvalQueue.remove(task);
+
+    task.complete(
+      'APPROVED FOR EXECUTION\\n'
+      'Action authorized by user: ${task.goal}\\n'
+      'No financial transaction was performed automatically.',
+    );
+
     _record('Approved: ${task.goal}');
     return true;
   }

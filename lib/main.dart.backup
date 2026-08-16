@@ -659,8 +659,6 @@ class _EtherHomeState extends State<EtherHome> {
           Icons.pending_actions_outlined,
           'APPROVAL QUEUE',
           '${_businessControlCenter.approvalQueue.pendingCount} item(s) need your attention.',
-          onTap: _showApprovalQueue,
-          enabled: _businessControlCenter.approvalQueue.pendingCount > 0,
         ),
 
         const SizedBox(height: 8),
@@ -863,182 +861,14 @@ class _EtherHomeState extends State<EtherHome> {
     );
   }
 
-  void _showApprovalQueue() {
-    final queue = _businessControlCenter.approvalQueue;
-
-    if (queue.items.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No approval requests pending.'),
-        ),
-      );
-      return;
-    }
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF0B0F18),
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'APPROVAL QUEUE',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${queue.pendingCount} item(s) need your attention.',
-                  style: const TextStyle(
-                    color: Colors.white54,
-                  ),
-                ),
-                const SizedBox(height: 18),
-
-                ...queue.items.map(
-                  (task) => Container(
-                    margin: const EdgeInsets.only(bottom: 14),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF05070D),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFFFFC107)
-                            .withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'APPROVAL REQUIRED',
-                          style: TextStyle(
-                            color: Color(0xFFFFC107),
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          task.goal,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Permission: ${task.permission.name}',
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  final approved = await
-                                      _businessControlCenter.approve(task);
-
-                                  Navigator.pop(sheetContext);
-
-                                  if (approved && mounted) {
-                                    setState(() {});
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Business action approved.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.check_rounded,
-                                ),
-                                label: const Text('APPROVE'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () async {
-                                  final rejected =
-                                      _businessControlCenter.reject(task);
-
-                                  Navigator.pop(sheetContext);
-
-                                  if (rejected && mounted) {
-                                    setState(() {});
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Business action rejected.',
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.close_rounded,
-                                ),
-                                label: const Text('REJECT'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
-  Widget _infoCard(
-    IconData icon,
-    String title,
-    String subtitle, {
-    VoidCallback? onTap,
-    bool enabled = false,
-  }) {
-    final card = Container(
+  Widget _infoCard(IconData icon, String title, String subtitle) {
+    return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.035),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: enabled
-              ? const Color(0xFF00E5FF).withValues(alpha: 0.30)
-              : Colors.white.withValues(alpha: 0.08),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Row(
         children: [
@@ -1058,30 +888,13 @@ class _EtherHomeState extends State<EtherHome> {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white54,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white54),
                 ),
               ],
             ),
           ),
-          if (enabled)
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Colors.white54,
-            ),
         ],
       ),
-    );
-
-    if (onTap == null) {
-      return card;
-    }
-
-    return GestureDetector(
-      onTap: onTap,
-      child: card,
     );
   }
 

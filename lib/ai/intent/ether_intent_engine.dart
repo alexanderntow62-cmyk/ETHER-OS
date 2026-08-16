@@ -27,6 +27,20 @@ class EtherIntentEngine {
       );
     }
 
+    // BUSINESS ACTIONS MUST BE CHECKED BEFORE SYSTEM ACTIONS.
+    // Example: "Start a dropshipping business" must be business,
+    // not systemAction just because it starts with "start ".
+    if (lower.contains('business') ||
+        lower.contains('make money') ||
+        lower.contains('find a customer') ||
+        lower.contains('find customers') ||
+        lower.contains('business idea')) {
+      return EtherIntent(
+        type: EtherIntentType.businessAction,
+        input: text,
+      );
+    }
+
     // System actions
     if (lower.startsWith('open ') ||
         lower.startsWith('launch ') ||
@@ -39,21 +53,10 @@ class EtherIntentEngine {
       );
     }
 
-    // Business actions
-    if (lower.contains('business') ||
-        lower.contains('make money') ||
-        lower.contains('find a customer') ||
-        lower.contains('find customers') ||
-        lower.contains('business idea')) {
-      return EtherIntent(
-        type: EtherIntentType.businessAction,
-        input: text,
-      );
-    }
-
     // Calculator / registered skills
-    if (RegExp(r'\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?')
-            .hasMatch(lower) ||
+    if (RegExp(
+      r'\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?',
+    ).hasMatch(lower) ||
         lower.startsWith('calculate ') ||
         lower.startsWith('compute ') ||
         lower.contains(' plus ') ||
@@ -86,7 +89,6 @@ class EtherIntentEngine {
       );
     }
 
-    // Unknown requests can still go to the AI.
     return EtherIntent(
       type: EtherIntentType.unknown,
       input: text,

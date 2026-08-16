@@ -1,0 +1,195 @@
+import 'ether_memory.dart';
+import 'ether_persistent_memory.dart';
+import '../../skills/core/ether_skill_engine.dart';
+
+class EtherBrain {
+  final String name;
+  final EtherMemory memory;
+  final EtherSkillEngine skills;
+  final EtherPersistentMemory persistentMemory;
+
+  final Map<String, String> _facts = {};
+
+  EtherBrain({
+    this.name = 'ETHER',
+    EtherMemory? memory,
+    EtherSkillEngine? skills,
+    EtherPersistentMemory? persistentMemory,
+  })  : memory = memory ?? EtherMemory(),
+        skills = skills ?? EtherSkillEngine(),
+        persistentMemory =
+            persistentMemory ?? EtherPersistentMemory();
+
+  Future<void> initialize() async {
+    final savedFacts = await persistentMemory.loadFacts();
+
+    _facts
+      ..clear()
+      ..addAll(savedFacts);
+  }
+
+  Future<String> think(String message) async {
+    final input = message.trim();
+
+    if (input.isEmpty) {
+      return '$name is ready. Please give me something to work with.';
+    }
+
+    memory.rememberUser(input);
+
+    final lower = input.toLowerCase();
+
+    // Clear all persistent and conversation memory.
+    if (lower == 'clear memory') {
+      memory.clear();
+      _facts.clear();
+
+      await persistentMemory.clear();
+
+      final response = '$name memory has been cleared.';
+      memory.rememberEther(response);
+
+      return response;
+    }
+
+    // Forget the user's saved name.
+    if (lower == 'forget my name') {
+      if (_facts.remove('name') != null) {
+        await persistentMemory.saveFacts(_facts);
+
+        final response = 'I have forgotten your name.';
+        memory.rememberEther(response);
+
+        return response;
+      }
+
+      final response = 'I do not have your name saved.';
+      memory.rememberEther(response);
+
+      return response;
+    }
+
+    // Store the user's name.
+    if (lower.startsWith('my name is ')) {
+      final value =
+          input.substring('my name is '.length).trim();
+
+      late final String response;
+
+      if (value.isNotEmpty) {
+        _facts['name'] = value;
+
+        await persistentMemory.saveFacts(_facts);
+
+        response =
+            'Got it. I will remember that your name is $value.';
+      } else {
+        response =
+            'Tell me your name after saying "My name is".';
+      }
+
+      memory.rememberEther(response);
+      return response;
+    }
+
+    // Store a general fact.
+    if (lower.startsWith('remember that ')) {
+      final fact =
+          input.substring('remember that '.length).trim();
+
+      late final String response;
+
+      if (fact.isNotEmpty) {
+        final key =
+            'fact_${DateTime.now().millisecondsSinceEpoch}';
+
+        _facts[key] = fact;
+
+        await persistentMemory.saveFacts(_facts);
+
+        response = 'Understood. I will remember that.';
+      } else {
+        response =
+            'Tell me what you want me to remember.';
+      }
+
+      memory.rememberEther(response);
+      return response;
+    }
+
+    // Retrieve the user's name.
+    if (lower.contains('what is my name')) {
+      final rememberedName = _facts['name'];
+
+      final response = rememberedName == null
+          ? 'You have not told me your name yet.'
+          : 'Your name is $rememberedName.';
+
+      memory.rememberEther(response);
+      return response;
+    }
+
+    // Show everything ETHER remembers.
+    if (lower.contains('what do you remember')) {
+      late final String response;
+
+      if (_facts.isEmpty) {
+        response = 'I do not have any saved facts yet.';
+      } else {
+        final facts = _facts.entries
+            .map((entry) => '• ${entry.value}')
+            .join('\n');
+
+        response = 'Here is what I remember:\n$facts';
+      }
+
+      memory.rememberEther(response);
+      return response;
+    }
+
+    // Try registered skills before normal conversation.
+    final skillResult = await skills.tryHandle(input);
+
+    if (skillResult != null) {
+      memory.rememberEther(skillResult);
+      return skillResult;
+    }
+
+    late final String response;
+
+    if (lower == 'hello' ||
+        lower == 'hi' ||
+        lower == 'hey') {
+      response =
+          'Hello. I am $name. My core brain is active and ready.';
+    } else if (lower.contains('who are you')) {
+      response =
+          'I am $name, the intelligence core of ETHER-OS.';
+    } else if (lower.contains('status')) {
+      response =
+          '$name Brain: ONLINE\n'
+          'AI Core: ACTIVE\n'
+          'Memory: ACTIVE\n'
+          'Facts: ${_facts.length}\n'
+          'Conversation Memory: ${memory.length}/'
+          '${EtherMemory.maxMessages}\n'
+          'Tools: ACTIVE\n'
+          'Skills: ${skills.skillNames.join(', ')}';
+    } else {
+      // Use recent conversation context for simple follow-ups.
+      final context = memory.getRecentContext(6);
+
+      final contextResponse =
+          _answerFromRecentContext(lower, context);
+
+      response = contextResponse ??
+          'I received your request: "$input"\n\n'
+          '$name Brain is processing it. '
+          'Memory, conversation context, skills, '
+          'and basic recall are active.';
+    }
+
+    memory.rememberEther(response);
+    return response;
+  }
+

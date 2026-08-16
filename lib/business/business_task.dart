@@ -1,6 +1,12 @@
 import 'business_permission.dart';
 
-enum BusinessTaskStatus { pending, running, completed, waitingApproval, failed }
+enum BusinessTaskStatus {
+  pending,
+  running,
+  completed,
+  waitingApproval,
+  failed,
+}
 
 class BusinessTask {
   final String id;
@@ -18,7 +24,8 @@ class BusinessTask {
     this.result = '',
   });
 
-  bool get requiresApproval => permission != BusinessPermission.autonomous;
+  bool get requiresApproval =>
+      permission != BusinessPermission.autonomous;
 
   void start() {
     status = BusinessTaskStatus.running;

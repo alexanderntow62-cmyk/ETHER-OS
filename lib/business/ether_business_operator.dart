@@ -42,7 +42,11 @@ class EtherBusinessOperator {
     final planResult = await business.execute(task);
 
     if (task.status == BusinessTaskStatus.waitingApproval) {
-      return planResult;
+      return [
+        'ETHER BUSINESS OPERATOR',
+        '',
+        planResult,
+      ].join('\n');
     }
 
     final researchReport = research.createReport();
