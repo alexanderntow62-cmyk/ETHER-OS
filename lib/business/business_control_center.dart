@@ -4,9 +4,9 @@ import 'ether_business_operator.dart';
 import 'ether_business_worker.dart';
 
 class BusinessControlCenter {
-  final EtherBusinessOperator operator;
-  final EtherBusinessWorker worker;
-  final BusinessApprovalQueue approvalQueue;
+  late final EtherBusinessOperator operator;
+  late final EtherBusinessWorker worker;
+  late final BusinessApprovalQueue approvalQueue;
 
   final List<String> _businesses = [];
   final List<String> _activity = [];
@@ -15,9 +15,11 @@ class BusinessControlCenter {
     EtherBusinessOperator? operator,
     EtherBusinessWorker? worker,
     BusinessApprovalQueue? approvalQueue,
-  }) : operator = operator ?? EtherBusinessOperator(),
-       worker = worker ?? EtherBusinessWorker(),
-       approvalQueue = approvalQueue ?? BusinessApprovalQueue();
+  }) {
+    this.operator = operator ?? EtherBusinessOperator();
+    this.worker = worker ?? EtherBusinessWorker(operator: this.operator);
+    this.approvalQueue = approvalQueue ?? BusinessApprovalQueue();
+  }
 
   List<String> get businesses => List.unmodifiable(_businesses);
 

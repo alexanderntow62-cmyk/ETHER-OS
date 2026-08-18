@@ -3,6 +3,7 @@ import '../system/ether_system_action_engine.dart';
 import '../intent/ether_intent_engine.dart';
 import 'ether_persistent_memory.dart';
 import '../../skills/core/ether_skill_engine.dart';
+import '../../business/ether_business_engine.dart';
 import '../online/ether_ai_engine.dart';
 import '../online/gemini_ai_config.dart';
 import '../online/gemini_ether_engine.dart';
@@ -14,6 +15,7 @@ class EtherBrain {
   final EtherSystemActionEngine systemActions;
   final EtherSkillEngine skills;
   final EtherPersistentMemory persistentMemory;
+  final EtherBusinessEngine business;
   final EtherAIEngine? onlineAI;
 
   final Map<String, String> _facts = {};
@@ -25,12 +27,14 @@ class EtherBrain {
     EtherSystemActionEngine? systemActions,
     EtherSkillEngine? skills,
     EtherPersistentMemory? persistentMemory,
+    EtherBusinessEngine? business,
     EtherAIEngine? onlineAI,
   }) : memory = memory ?? EtherMemory(),
        intents = intents ?? EtherIntentEngine(),
        systemActions = systemActions ?? EtherSystemActionEngine(),
        skills = skills ?? EtherSkillEngine(),
        persistentMemory = persistentMemory ?? EtherPersistentMemory(),
+       business = business ?? EtherBusinessEngine(),
        onlineAI =
            onlineAI ??
            (GeminiAIConfig.hasGeminiKey
@@ -416,6 +420,27 @@ class EtherBrain {
       return response;
     }
 
+    // Handle business commands.
+    if (_isBusinessCommand(lower)) {
+      final goal = _extractBusinessGoal(input);
+
+      if (goal == null || goal.isEmpty) {
+        final response =
+            'Tell me what business objective you want ETHER to work on.';
+        memory.rememberEther(response);
+        return response;
+      }
+
+      final task = business.createTask(
+        id: 'business_${DateTime.now().millisecondsSinceEpoch}',
+        goal: goal,
+      );
+
+      final businessResult = await business.execute(task);
+      memory.rememberEther(businessResult);
+      return businessResult;
+    }
+
     // Route system actions through the system action engine.
     if (intent.isSystemAction) {
       final systemResult = await systemActions.execute(input);
@@ -486,6 +511,47 @@ class EtherBrain {
 
     memory.rememberEther(response);
     return response;
+  }
+
+  bool _isBusinessCommand(String lower) {
+    return lower.startsWith('business ') ||
+        lower.startsWith('business:') ||
+        lower.startsWith('create a business task ') ||
+        lower.startsWith('create a business plan ') ||
+        lower.startsWith('make a business plan ') ||
+        lower.startsWith('build a business plan ') ||
+        lower.startsWith('plan a business ') ||
+        lower.startsWith('start a business task ') ||
+        lower.startsWith('work on my business ') ||
+        lower.startsWith('help me start a business ');
+  }
+
+  String? _extractBusinessGoal(String input) {
+    final lower = input.toLowerCase();
+
+    const prefixes = [
+      'create a business task ',
+      'create a business plan ',
+      'make a business plan ',
+      'build a business plan ',
+      'plan a business ',
+      'start a business task ',
+      'work on my business ',
+      'help me start a business ',
+      'business:',
+      'business ',
+    ];
+
+    for (final prefix in prefixes) {
+      if (lower.startsWith(prefix)) {
+        final goal = input.substring(prefix.length).trim();
+        if (goal.isNotEmpty) {
+          return goal;
+        }
+      }
+    }
+
+    return null;
   }
 
   String? _answerFromRecentContext(String lower, String context) {

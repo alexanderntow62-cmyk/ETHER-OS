@@ -13,4 +13,15 @@ class EtherAndroidBridge {
 
     return result ?? false;
   }
+
+  Future<bool> launchApp(String appName) async {
+    final result = await _channel.invokeMethod<bool>(
+      'launchApp',
+      <String, dynamic>{
+        'appName': appName,
+      },
+    );
+
+    return result ?? false;
+  }
 }

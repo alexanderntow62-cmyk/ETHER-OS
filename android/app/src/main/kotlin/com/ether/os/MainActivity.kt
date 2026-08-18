@@ -50,6 +50,66 @@ class MainActivity : FlutterActivity() {
                     }
                 }
 
+                "launchApp" -> {
+                    val appName = call.argument<String>("appName")?.trim()
+
+                    if (appName.isNullOrBlank()) {
+                        result.error(
+                            "INVALID_APP_NAME",
+                            "No app name was provided.",
+                            null
+                        )
+                        return@setMethodCallHandler
+                    }
+
+                    try {
+                        val packageManager = packageManager
+                        val packages = packageManager.getInstalledPackages(0)
+
+                        val target = appName.lowercase()
+
+                        val matchingPackage = packages.firstOrNull { packageInfo ->
+                            val label = packageInfo.applicationInfo?.loadLabel(packageManager)
+                                .toString()
+                                .lowercase()
+
+                            label == target
+                        } ?: packages.firstOrNull { packageInfo ->
+                            val label = packageInfo.applicationInfo?.loadLabel(packageManager)
+                                .toString()
+                                .lowercase()
+
+                            label.contains(target)
+                        }
+
+                        if (matchingPackage == null) {
+                            result.success(false)
+                            return@setMethodCallHandler
+                        }
+
+                        val launchIntent = packageManager.getLaunchIntentForPackage(
+                            matchingPackage.packageName
+                        )
+
+                        if (launchIntent == null) {
+                            result.success(false)
+                            return@setMethodCallHandler
+                        }
+
+                        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(launchIntent)
+
+                        result.success(true)
+
+                    } catch (e: Exception) {
+                        result.error(
+                            "LAUNCH_APP_FAILED",
+                            e.message,
+                            null
+                        )
+                    }
+                }
+
                 else -> result.notImplemented()
             }
         }

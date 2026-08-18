@@ -25,8 +25,32 @@ class EtherSystemActionEngine {
       }
     }
 
+    if (lower.startsWith('launch ')) {
+      final target = text.substring(7).trim();
+
+      if (target.isEmpty) {
+        return 'I need an app name to launch.';
+      }
+
+      try {
+        final opened = await android.launchApp(target);
+
+        if (opened) {
+          return 'Opening $target.';
+        }
+
+        return 'I could not find an installed app named $target.';
+      } catch (e) {
+        return 'I could not launch $target: $e';
+      }
+    }
+
     if (lower.startsWith('open ')) {
       final target = text.substring(5).trim();
+
+      if (target.isEmpty) {
+        return 'I need an app or URL to open.';
+      }
 
       if (target.startsWith('http://') ||
           target.startsWith('https://')) {
@@ -38,13 +62,17 @@ class EtherSystemActionEngine {
         }
       }
 
-      return 'I understood that you want to open $target, but I do not know its URL yet.';
-    }
+      try {
+        final opened = await android.launchApp(target);
 
-    if (lower.startsWith('launch ')) {
-      final target = text.substring(7).trim();
+        if (opened) {
+          return 'Opening $target.';
+        }
 
-      return 'I understood that you want to launch $target, but app launching is not connected yet.';
+        return 'I could not find an installed app named $target.';
+      } catch (e) {
+        return 'I could not open $target: $e';
+      }
     }
 
     return 'I understood this as a system action, but I do not have an executor for it yet.';

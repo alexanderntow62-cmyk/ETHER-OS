@@ -10,6 +10,11 @@ class EtherPlanner {
     }
 
     final lower = input.toLowerCase();
+
+    if (_looksLikeMultipleCalculations(input)) {
+      return _createCalculationPlan(input);
+    }
+
     final tasks = <EtherTask>[];
 
     if (lower.contains('profit') ||
@@ -24,7 +29,8 @@ class EtherPlanner {
         final cost = numbers[0];
         final sellingPrice = numbers[1];
         final profit = sellingPrice - cost;
-        final margin = sellingPrice == 0 ? 0 : (profit / sellingPrice) * 100;
+        final margin =
+            sellingPrice == 0 ? 0 : (profit / sellingPrice) * 100;
 
         tasks.add(
           EtherTask(
@@ -34,7 +40,10 @@ class EtherPlanner {
         );
 
         tasks.add(
-          EtherTask(id: 'task_2', goal: 'Calculate $sellingPrice minus $cost.'),
+          EtherTask(
+            id: 'task_2',
+            goal: 'Calculate $sellingPrice minus $cost.',
+          ),
         );
 
         tasks.add(
@@ -60,17 +69,80 @@ class EtherPlanner {
         );
 
         tasks.add(
-          EtherTask(id: 'task_2', goal: 'Calculate the expected profit.'),
+          EtherTask(
+            id: 'task_2',
+            goal: 'Calculate the expected profit.',
+          ),
         );
 
         tasks.add(
-          EtherTask(id: 'task_3', goal: 'Calculate the profit margin.'),
+          EtherTask(
+            id: 'task_3',
+            goal: 'Calculate the profit margin.',
+          ),
         );
       }
     } else {
-      tasks.add(EtherTask(id: 'task_1', goal: input));
+      tasks.add(
+        EtherTask(
+          id: 'task_1',
+          goal: input,
+        ),
+      );
     }
 
-    return EtherPlan(goal: input, tasks: tasks);
+    return EtherPlan(
+      goal: input,
+      tasks: tasks,
+    );
+  }
+
+  bool _looksLikeMultipleCalculations(String input) {
+    final normalized = input.toLowerCase();
+
+    final hasMathOperators =
+        RegExp(r'[\d\)]\s*[+\-*/×÷]\s*[\d\(]')
+            .hasMatch(normalized);
+
+    final hasMathWords =
+        normalized.contains(' plus ') ||
+        normalized.contains(' minus ') ||
+        normalized.contains(' times ') ||
+        normalized.contains(' divided by ') ||
+        normalized.contains(' multiplied by ');
+
+    final separators =
+        RegExp(r',|\band\b').allMatches(normalized).length;
+
+    return (hasMathOperators || hasMathWords) && separators > 0;
+  }
+
+  EtherPlan _createCalculationPlan(String input) {
+    var text = input.trim();
+
+    text = text.replaceAll(' and ', ',');
+    text = text.replaceAll(' AND ', ',');
+
+    final parts = text
+        .split(',')
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .toList();
+
+    final tasks = <EtherTask>[];
+
+    for (var i = 0; i < parts.length; i++) {
+      tasks.add(
+        EtherTask(
+          id: 'task_${i + 1}',
+          goal: parts[i],
+        ),
+      );
+    }
+
+    return EtherPlan(
+      goal: input,
+      tasks: tasks,
+    );
   }
 }
