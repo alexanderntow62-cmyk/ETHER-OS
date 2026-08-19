@@ -46,3 +46,7 @@ app.*.map.json
 
 android/key.properties
 android/keystore/*.jks
+
+# Temporary backup files
+*.backup
+*.before-*
