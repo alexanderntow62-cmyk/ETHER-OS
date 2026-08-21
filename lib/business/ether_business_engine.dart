@@ -3,20 +3,27 @@ import 'business_task.dart';
 import 'business_planner.dart';
 import 'business_approval_queue.dart';
 import 'business_execution_gate.dart';
+import 'integrations/business_integration_registry.dart';
+import 'integrations/business_integration_result.dart';
 
 class EtherBusinessEngine {
   final List<BusinessTask> _tasks = [];
+
   final EtherBusinessPlanner planner;
-final BusinessApprovalQueue approvalQueue;
-final BusinessExecutionGate executionGate;
+  final BusinessApprovalQueue approvalQueue;
+  final BusinessExecutionGate executionGate;
+  final BusinessIntegrationRegistry integrations;
 
   EtherBusinessEngine({
-  EtherBusinessPlanner? planner,
-  BusinessApprovalQueue? approvalQueue,
-BusinessExecutionGate? executionGate,
-})  : planner = planner ?? EtherBusinessPlanner(),
-      approvalQueue = approvalQueue ?? BusinessApprovalQueue(),
-      executionGate = executionGate ?? BusinessExecutionGate();
+    EtherBusinessPlanner? planner,
+    BusinessApprovalQueue? approvalQueue,
+    BusinessExecutionGate? executionGate,
+    BusinessIntegrationRegistry? integrations,
+  })  : planner = planner ?? EtherBusinessPlanner(),
+        approvalQueue = approvalQueue ?? BusinessApprovalQueue(),
+        executionGate = executionGate ?? BusinessExecutionGate(),
+        integrations =
+            integrations ?? BusinessIntegrationRegistry();
 
   List<BusinessTask> get tasks => List.unmodifiable(_tasks);
 
@@ -25,7 +32,11 @@ BusinessExecutionGate? executionGate,
     required String goal,
     BusinessPermission permission = BusinessPermission.autonomous,
   }) {
-    final task = BusinessTask(id: id, goal: goal, permission: permission);
+    final task = BusinessTask(
+      id: id,
+      goal: goal,
+      permission: permission,
+    );
 
     _tasks.add(task);
     return task;
@@ -50,8 +61,6 @@ BusinessExecutionGate? executionGate,
           'Action: ${task.goal}';
     }
 
-    // Autonomous business work is authorized internally,
-    // then passed through the execution gate.
     task.waitForApproval();
     task.approve();
 
@@ -88,6 +97,7 @@ BusinessExecutionGate? executionGate,
         task.waitForApproval();
         approvalQueue.add(task);
         task.result = lines.join('\n');
+
         return task.result;
       }
 
@@ -102,6 +112,55 @@ BusinessExecutionGate? executionGate,
     );
   }
 
+  Future<BusinessIntegrationResult> executeIntegration({
+    required BusinessTask task,
+    required String integrationId,
+    required String action,
+    Map<String, dynamic> parameters = const {},
+  }) async {
+    if (task.permission == BusinessPermission.financial) {
+      task.waitForApproval();
+      approvalQueue.add(task);
+
+      return BusinessIntegrationResult.failure(
+        integration: integrationId,
+        action: action,
+        message:
+            'FINANCIAL EXECUTION BLOCKED. '
+            'User approval is required before this integration action.',
+      );
+    }
+
+    if (task.permission == BusinessPermission.approvalRequired) {
+      task.waitForApproval();
+      approvalQueue.add(task);
+
+      return BusinessIntegrationResult.failure(
+        integration: integrationId,
+        action: action,
+        message:
+            'APPROVAL REQUIRED. '
+            'This integration action requires user approval.',
+      );
+    }
+
+    if (task.status != BusinessTaskStatus.approved) {
+      return BusinessIntegrationResult.failure(
+        integration: integrationId,
+        action: action,
+        message:
+            'EXECUTION BLOCKED. '
+            'The business task has not been approved for execution.',
+      );
+    }
+
+    return integrations.execute(
+      integrationId: integrationId,
+      action: action,
+      parameters: parameters,
+    );
+  }
+
   bool approveTask(BusinessTask task) {
     if (!approvalQueue.approve(task)) {
       return false;
@@ -111,8 +170,14 @@ BusinessExecutionGate? executionGate,
     return true;
   }
 
-  bool rejectTask(BusinessTask task, {String reason = 'Rejected by user.'}) {
-    return approvalQueue.reject(task, reason: reason);
+  bool rejectTask(
+    BusinessTask task, {
+    String reason = 'Rejected by user.',
+  }) {
+    return approvalQueue.reject(
+      task,
+      reason: reason,
+    );
   }
 
   int get pendingApprovalCount => approvalQueue.pendingCount;
