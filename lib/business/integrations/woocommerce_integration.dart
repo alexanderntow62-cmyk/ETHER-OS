@@ -25,6 +25,15 @@ class WooCommerceIntegration implements BusinessIntegration {
   String get name => 'WooCommerce';
 
   @override
+  Set<String> get supportedActions => const {
+        'test_connection',
+        'get_store',
+        'list_products',
+        'get_product',
+        'list_orders',
+      };
+
+  @override
   bool get isConfigured =>
       storeUrl != null &&
       storeUrl!.trim().isNotEmpty &&

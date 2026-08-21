@@ -9,6 +9,9 @@ import '../lib/business/integrations/business_integration_result.dart';
 
 class TestIntegration implements BusinessIntegration {
   @override
+  Set<String> get supportedActions => {'list_products', 'purchase_inventory', 'publish'};
+
+  @override
   final String id = 'woocommerce';
 
   @override

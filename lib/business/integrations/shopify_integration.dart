@@ -17,6 +17,9 @@ class ShopifyIntegration implements BusinessIntegration {
   String get name => 'Shopify';
 
   @override
+  Set<String> get supportedActions => const {};
+
+  @override
   bool get isConfigured =>
       storeUrl != null &&
       storeUrl!.trim().isNotEmpty &&

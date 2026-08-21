@@ -7,6 +7,9 @@ import '../lib/business/integrations/woocommerce_integration.dart';
 
 class FakeBusinessIntegration implements BusinessIntegration {
   @override
+  Set<String> get supportedActions => {'test'};
+
+  @override
   final String id;
 
   @override

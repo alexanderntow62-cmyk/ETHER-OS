@@ -1,13 +1,23 @@
 import 'business_integration.dart';
 import 'business_integration_result.dart';
+import 'woocommerce_integration.dart';
+import 'shopify_integration.dart';
+import 'printful_integration.dart';
 
 class BusinessIntegrationRegistry {
   final Map<String, BusinessIntegration> _integrations = {};
 
   BusinessIntegrationRegistry({
-    Iterable<BusinessIntegration> integrations = const [],
+    Iterable<BusinessIntegration>? integrations,
   }) {
-    for (final integration in integrations) {
+    final defaults = integrations ??
+        <BusinessIntegration>[
+          WooCommerceIntegration(),
+          ShopifyIntegration(),
+          PrintfulIntegration(),
+        ];
+
+    for (final integration in defaults) {
       register(integration);
     }
   }
@@ -27,6 +37,22 @@ class BusinessIntegrationRegistry {
       );
 
   bool contains(String id) => _integrations.containsKey(id);
+
+  Set<String> supportedActions(String id) {
+    return get(id)?.supportedActions ?? const {};
+  }
+
+  bool supportsAction({
+    required String integrationId,
+    required String action,
+  }) {
+    final integration = get(integrationId);
+    if (integration == null) {
+      return false;
+    }
+
+    return integration.supportedActions.contains(action);
+  }
 
   Future<bool> testConnection(String id) async {
     final integration = get(id);

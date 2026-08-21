@@ -15,6 +15,9 @@ class PrintfulIntegration implements BusinessIntegration {
   String get name => 'Printful';
 
   @override
+  Set<String> get supportedActions => const {};
+
+  @override
   bool get isConfigured =>
       apiKey != null && apiKey!.trim().isNotEmpty;
 

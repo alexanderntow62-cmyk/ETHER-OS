@@ -5,6 +5,11 @@ abstract class BusinessIntegration {
 
   bool get isConfigured;
 
+  /// Actions this integration actually implements.
+  ///
+  /// Registration alone does not imply that an action is available.
+  Set<String> get supportedActions;
+
   Future<BusinessIntegrationResult> execute({
     required String action,
     required Map<String, dynamic> parameters,
