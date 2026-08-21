@@ -5,6 +5,7 @@ import 'business_approval_queue.dart';
 import 'business_execution_gate.dart';
 import 'integrations/business_integration_registry.dart';
 import 'integrations/business_integration_result.dart';
+import 'integrations/business_integration_action_policy.dart';
 
 class EtherBusinessEngine {
   final List<BusinessTask> _tasks = [];
@@ -13,17 +14,22 @@ class EtherBusinessEngine {
   final BusinessApprovalQueue approvalQueue;
   final BusinessExecutionGate executionGate;
   final BusinessIntegrationRegistry integrations;
+  final BusinessIntegrationActionPolicy integrationActionPolicy;
 
   EtherBusinessEngine({
     EtherBusinessPlanner? planner,
     BusinessApprovalQueue? approvalQueue,
     BusinessExecutionGate? executionGate,
     BusinessIntegrationRegistry? integrations,
+    BusinessIntegrationActionPolicy? integrationActionPolicy,
   })  : planner = planner ?? EtherBusinessPlanner(),
         approvalQueue = approvalQueue ?? BusinessApprovalQueue(),
         executionGate = executionGate ?? BusinessExecutionGate(),
         integrations =
-            integrations ?? BusinessIntegrationRegistry();
+            integrations ?? BusinessIntegrationRegistry(),
+        integrationActionPolicy =
+            integrationActionPolicy ??
+                const BusinessIntegrationActionPolicy();
 
   List<BusinessTask> get tasks => List.unmodifiable(_tasks);
 
@@ -118,7 +124,21 @@ class EtherBusinessEngine {
     required String action,
     Map<String, dynamic> parameters = const {},
   }) async {
-    if (task.permission == BusinessPermission.financial) {
+    if (!integrations.contains(integrationId)) {
+      return BusinessIntegrationResult.failure(
+        integration: integrationId,
+        action: action,
+        message: 'Integration "$integrationId" is not registered.',
+      );
+    }
+
+    final risk = integrationActionPolicy.classify(
+      integrationId: integrationId,
+      action: action,
+    );
+
+    if (risk == BusinessIntegrationActionRisk.financial ||
+        task.permission == BusinessPermission.financial) {
       task.waitForApproval();
       approvalQueue.add(task);
 
@@ -131,7 +151,8 @@ class EtherBusinessEngine {
       );
     }
 
-    if (task.permission == BusinessPermission.approvalRequired) {
+    if (risk == BusinessIntegrationActionRisk.approvalRequired ||
+        task.permission == BusinessPermission.approvalRequired) {
       task.waitForApproval();
       approvalQueue.add(task);
 
