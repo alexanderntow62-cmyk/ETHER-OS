@@ -41,10 +41,10 @@ class BusinessIntegrationActionPolicy {
       }
     }
 
-    // Registered integrations may execute their own actions
-    // unless the integration has explicitly classified the
-    // action as requiring approval or financial authorization.
-    return BusinessIntegrationActionRisk.autonomous;
+    // Fail closed: unknown integration actions require approval.
+    // New integrations/actions must be explicitly classified as
+    // autonomous before ETHER can execute them without approval.
+    return BusinessIntegrationActionRisk.approvalRequired;
   }
 
   BusinessPermission permissionFor({

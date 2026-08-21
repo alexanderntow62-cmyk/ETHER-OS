@@ -85,13 +85,13 @@ void main() {
       }
     });
 
-    test('unclassified actions default to autonomous', () {
+    test('unclassified actions fail closed and require approval', () {
       expect(
         policy.classify(
           integrationId: 'test',
           action: 'sync',
         ),
-        BusinessIntegrationActionRisk.autonomous,
+        BusinessIntegrationActionRisk.approvalRequired,
       );
 
       expect(
@@ -99,7 +99,7 @@ void main() {
           integrationId: 'test',
           action: 'sync',
         ),
-        BusinessPermission.autonomous,
+        BusinessPermission.approvalRequired,
       );
     });
   });

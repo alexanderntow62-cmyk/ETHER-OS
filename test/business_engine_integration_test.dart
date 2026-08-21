@@ -9,7 +9,7 @@ import '../lib/business/integrations/business_integration_result.dart';
 
 class TestIntegration implements BusinessIntegration {
   @override
-  final String id = 'test';
+  final String id = 'woocommerce';
 
   @override
   final String name = 'Test Integration';
@@ -62,14 +62,14 @@ void main() {
 
       final result = await engine.executeIntegration(
         task: task,
-        integrationId: 'test',
-        action: 'sync_catalog',
+        integrationId: 'woocommerce',
+        action: 'list_products',
       );
 
       expect(result.success, isTrue);
-      expect(result.integration, 'test');
-      expect(result.action, 'sync_catalog');
-      expect(integration.lastAction, 'sync_catalog');
+      expect(result.integration, 'woocommerce');
+      expect(result.action, 'list_products');
+      expect(integration.lastAction, 'list_products');
     });
 
     test('financial task is blocked', () async {
@@ -81,7 +81,7 @@ void main() {
 
       final result = await engine.executeIntegration(
         task: task,
-        integrationId: 'test',
+        integrationId: 'woocommerce',
         action: 'purchase_inventory',
       );
 
@@ -101,7 +101,7 @@ void main() {
 
       final result = await engine.executeIntegration(
         task: task,
-        integrationId: 'test',
+        integrationId: 'woocommerce',
         action: 'publish',
       );
 
@@ -120,8 +120,8 @@ void main() {
 
       final result = await engine.executeIntegration(
         task: task,
-        integrationId: 'test',
-        action: 'sync',
+        integrationId: 'woocommerce',
+        action: 'list_products',
       );
 
       expect(result.success, isFalse);
