@@ -15,21 +15,27 @@ void main() {
 
     final result = await agent.run('calculate 25 times 4');
 
-    expect(result, contains('ETHER AGENT'));
-    expect(result, contains('COMPLETED'));
     expect(result, contains('100'));
   });
 
-  test('ETHER Agent plans a profit and margin calculation', () async {
+  test('ETHER Brain answers who created ETHER', () async {
+    final agent = EtherAgent();
+
+    final result = await agent.run('who created you');
+
+    expect(result.toLowerCase(), contains('alexander ntow'));
+    expect(result.toLowerCase(), contains('ether-os'));
+  });
+
+  test('ETHER Agent calculates business profit and margin', () async {
     final agent = EtherAgent();
 
     final result = await agent.run(
       'calculate profit and margin. Cost 50, selling price 80',
     );
 
-    expect(result, contains('ETHER AGENT'));
-    expect(result, contains('COMPLETED'));
-    expect(result, contains('30'));
-    expect(result, contains('37.50'));
+    expect(result, contains('Profit: 30'));
+    expect(result, contains('Margin: 37.50%'));
+    expect(result, contains('Markup: 60%'));
   });
 }

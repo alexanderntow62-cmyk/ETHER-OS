@@ -1,13 +1,22 @@
 import 'business_permission.dart';
 import 'business_task.dart';
 import 'business_planner.dart';
+import 'business_approval_queue.dart';
+import 'business_execution_gate.dart';
 
 class EtherBusinessEngine {
   final List<BusinessTask> _tasks = [];
   final EtherBusinessPlanner planner;
+final BusinessApprovalQueue approvalQueue;
+final BusinessExecutionGate executionGate;
 
-  EtherBusinessEngine({EtherBusinessPlanner? planner})
-    : planner = planner ?? EtherBusinessPlanner();
+  EtherBusinessEngine({
+  EtherBusinessPlanner? planner,
+  BusinessApprovalQueue? approvalQueue,
+BusinessExecutionGate? executionGate,
+})  : planner = planner ?? EtherBusinessPlanner(),
+      approvalQueue = approvalQueue ?? BusinessApprovalQueue(),
+      executionGate = executionGate ?? BusinessExecutionGate();
 
   List<BusinessTask> get tasks => List.unmodifiable(_tasks);
 
@@ -25,6 +34,7 @@ class EtherBusinessEngine {
   Future<String> execute(BusinessTask task) async {
     if (task.permission == BusinessPermission.financial) {
       task.waitForApproval();
+      approvalQueue.add(task);
 
       return 'APPROVAL REQUIRED\n'
           'ETHER cannot execute financial actions autonomously.\n'
@@ -33,13 +43,17 @@ class EtherBusinessEngine {
 
     if (task.permission == BusinessPermission.approvalRequired) {
       task.waitForApproval();
+      approvalQueue.add(task);
 
       return 'APPROVAL REQUIRED\n'
           'ETHER prepared this business action but needs your approval.\n'
           'Action: ${task.goal}';
     }
 
-    task.start();
+    // Autonomous business work is authorized internally,
+    // then passed through the execution gate.
+    task.waitForApproval();
+    task.approve();
 
     final plan = planner.createPlan(task.goal);
 
@@ -72,6 +86,7 @@ class EtherBusinessEngine {
         );
 
         task.waitForApproval();
+        approvalQueue.add(task);
         task.result = lines.join('\n');
         return task.result;
       }
@@ -81,11 +96,29 @@ class EtherBusinessEngine {
       lines.add('  ${step.description}');
     }
 
-    task.complete(lines.join('\n'));
-    return task.result;
+    return executionGate.execute(
+      task,
+      executionResult: lines.join('\n'),
+    );
   }
+
+  bool approveTask(BusinessTask task) {
+    if (!approvalQueue.approve(task)) {
+      return false;
+    }
+
+    task.approve();
+    return true;
+  }
+
+  bool rejectTask(BusinessTask task, {String reason = 'Rejected by user.'}) {
+    return approvalQueue.reject(task, reason: reason);
+  }
+
+  int get pendingApprovalCount => approvalQueue.pendingCount;
 
   void clearTasks() {
     _tasks.clear();
+    approvalQueue.clear();
   }
 }

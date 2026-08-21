@@ -52,7 +52,7 @@ void main() {
 
     expect(approved, isTrue);
     expect(control.approvalQueue.pendingCount, 0);
-    expect(task.status, BusinessTaskStatus.completed);
+    expect(task.status, BusinessTaskStatus.approved);
     expect(task.result, contains('APPROVED FOR EXECUTION'));
     expect(task.result, contains('Purchase inventory'));
     expect(task.result, contains('No financial transaction was performed'));

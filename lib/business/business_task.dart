@@ -5,6 +5,7 @@ enum BusinessTaskStatus {
   running,
   completed,
   waitingApproval,
+  approved,
   failed,
 }
 
@@ -25,10 +26,20 @@ class BusinessTask {
   });
 
   bool get requiresApproval =>
-      permission != BusinessPermission.autonomous;
+      permission != BusinessPermission.autonomous ||
+      status == BusinessTaskStatus.waitingApproval;
+
+  bool get isApproved => status == BusinessTaskStatus.approved;
 
   void start() {
     status = BusinessTaskStatus.running;
+  }
+
+  void approve() {
+    result = 'APPROVED FOR EXECUTION\n'
+        'Action authorized by user: $goal\n'
+        'No financial transaction was performed automatically.';
+    status = BusinessTaskStatus.approved;
   }
 
   void complete(String value) {

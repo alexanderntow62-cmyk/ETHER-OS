@@ -406,6 +406,17 @@ class EtherBrain {
       return response;
     }
 
+    // Handle questions about ETHER's creator.
+    if (lower.contains('who created you') ||
+        lower.contains('who made you') ||
+        lower.contains('who built you') ||
+        lower.contains('who is your creator')) {
+      final response =
+          'I was created by Alexander Ntow as part of the ETHER-OS project.';
+      memory.rememberEther(response);
+      return response;
+    }
+
     // Handle requests asking ETHER to introduce itself.
     if (lower.contains('who are you') ||
         lower.contains('tell me about yourself') ||

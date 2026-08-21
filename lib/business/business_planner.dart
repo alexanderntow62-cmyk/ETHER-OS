@@ -30,6 +30,75 @@ class EtherBusinessPlanner {
       return const BusinessPlan(goal: '', steps: []);
     }
 
+    if (lower.contains('affiliate')) {
+      return BusinessPlan(
+        goal: input,
+        steps: const [
+          BusinessPlanStep(
+            id: 'affiliate_1',
+            title: 'Define target market',
+            description: 'Identify the customer segment and problem the affiliate offer should address.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_2',
+            title: 'Research affiliate products',
+            description: 'Identify legitimate affiliate products that solve a clear customer problem.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_3',
+            title: 'Evaluate products',
+            description: 'Compare usefulness, trustworthiness, demand, competition, fulfillment, and affiliate terms.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_4',
+            title: 'Select product',
+            description: 'Choose the strongest product candidate without purchasing inventory.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_5',
+            title: 'Define customer problem',
+            description: 'Document the problem, desired outcome, objections, and reasons the offer may help.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_6',
+            title: 'Prepare offer',
+            description: 'Prepare the product explanation, value proposition, positioning, and call to action.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_7',
+            title: 'Prepare content strategy',
+            description: 'Prepare educational posts, demonstrations, comparisons, tutorials, FAQs, and problem-solving content.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_8',
+            title: 'Prepare organic acquisition',
+            description: 'Prepare organic social media, communities, referrals, and direct-outreach strategies.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_9',
+            title: 'Prepare conversion workflow',
+            description: 'Define the path from audience to content, interest, product explanation, affiliate link, merchant, and purchase.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_10',
+            title: 'Prepare performance tracking',
+            description: 'Define tracking for content, reach, engagement, clicks, conversions, commissions, and customer feedback.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_11',
+            title: 'Prepare optimization',
+            description: 'Define how ETHER can improve products, content, positioning, messaging, and acquisition based on results.',
+          ),
+          BusinessPlanStep(
+            id: 'affiliate_12',
+            title: 'Financial actions',
+            description: 'Purchases, advertising, subscriptions, inventory, and other financial commitments require your approval.',
+            permission: BusinessPermission.financial,
+          ),
+        ],
+      );
+    }
+
     if (lower.contains('dropshipping') || lower.contains('drop shipping')) {
       return BusinessPlan(
         goal: input,

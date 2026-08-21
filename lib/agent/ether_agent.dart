@@ -19,10 +19,9 @@ class EtherAgent {
     EtherBrain? brain,
     EtherBusinessEngine? business,
     EtherBusinessOperator? businessOperator,
-  })  : brain = brain ?? EtherBrain(),
-        business = business ?? EtherBusinessEngine(),
-        businessOperator =
-            businessOperator ?? EtherBusinessOperator() {
+  }) : brain = brain ?? EtherBrain(),
+       business = business ?? EtherBusinessEngine(),
+       businessOperator = businessOperator ?? EtherBusinessOperator() {
     planner = EtherPlanner();
     executor = EtherExecutor(brain: this.brain);
   }
@@ -68,9 +67,7 @@ class EtherAgent {
     ];
 
     for (final task in completedPlan.tasks) {
-      lines.add(
-        '${task.id} — ${task.status.name.toUpperCase()}',
-      );
+      lines.add('${task.id} — ${task.status.name.toUpperCase()}');
       lines.add('  ${task.goal}');
 
       if (task.result.isNotEmpty) {

@@ -1,4 +1,5 @@
-enum CapitalRequirement { zero, low, medium, high }
+export 'business_market_profile.dart';
+import 'business_market_profile.dart';
 
 enum BusinessOpportunityStatus { suitable, reviewRequired, reject }
 

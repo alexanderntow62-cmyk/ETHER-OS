@@ -1,5 +1,6 @@
 import 'business_approval_queue.dart';
 import 'business_task.dart';
+import 'ether_business_engine.dart';
 import 'ether_business_operator.dart';
 import 'ether_business_worker.dart';
 
@@ -16,9 +17,17 @@ class BusinessControlCenter {
     EtherBusinessWorker? worker,
     BusinessApprovalQueue? approvalQueue,
   }) {
-    this.operator = operator ?? EtherBusinessOperator();
-    this.worker = worker ?? EtherBusinessWorker(operator: this.operator);
     this.approvalQueue = approvalQueue ?? BusinessApprovalQueue();
+
+    this.operator = operator ??
+        EtherBusinessOperator(
+          business: EtherBusinessEngine(
+            approvalQueue: this.approvalQueue,
+          ),
+        );
+
+    this.worker =
+        worker ?? EtherBusinessWorker(operator: this.operator);
   }
 
   List<String> get businesses => List.unmodifiable(_businesses);
@@ -39,15 +48,16 @@ class BusinessControlCenter {
   Future<String> runBusinessCheck(String goal) async {
     var result = await worker.performCheck(goal);
 
-    // The Control Center must still be able to evaluate a business
-    // request outside the autonomous work window. The schedule controls
-    // autonomous execution; it must not prevent policy/approval analysis.
+    // The schedule controls autonomous execution.
+    // It must not prevent policy/approval analysis.
     if (result.contains('STATUS: OUTSIDE WORK WINDOW')) {
       result = await operator.start(goal);
     }
 
     _record(result);
 
+    // Safety net: ensure every waiting task is visible
+    // in the Control Center queue.
     for (final task in operator.business.tasks) {
       if (task.status == BusinessTaskStatus.waitingApproval) {
         approvalQueue.add(task);
@@ -91,11 +101,7 @@ class BusinessControlCenter {
 
     approvalQueue.remove(task);
 
-    task.complete(
-      'APPROVED FOR EXECUTION\\n'
-      'Action authorized by user: ${task.goal}\\n'
-      'No financial transaction was performed automatically.',
-    );
+    task.approve();
 
     _record('Approved: ${task.goal}');
     return true;
@@ -108,6 +114,7 @@ class BusinessControlCenter {
 
     task.fail('Rejected by user.');
     approvalQueue.remove(task);
+
     _record('Rejected: ${task.goal}');
     return true;
   }

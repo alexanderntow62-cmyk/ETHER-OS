@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'ether_ai_engine.dart';
@@ -10,7 +11,6 @@ class GeminiEtherEngine implements EtherAIEngine {
 
   static const String _systemInstruction = '''
 You are ETHER, the intelligence core of ETHER-OS.
-
 ETHER-OS is a project created and engineered by Alexander Ntow.
 
 Your identity:
@@ -61,42 +61,89 @@ Behavior:
       ],
     });
 
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json', 'x-goog-api-key': apiKey},
-      body: jsonEncode({'contents': contents}),
-    );
+    final body = jsonEncode({'contents': contents});
 
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(
-        'Gemini request failed (${response.statusCode}): ${response.body}',
-      );
-    }
+    Exception? lastError;
 
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final candidates = data['candidates'];
+    for (var attempt = 1; attempt <= 3; attempt++) {
+      try {
+        final response = await http
+            .post(
+              uri,
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': apiKey,
+              },
+              body: body,
+            )
+            .timeout(const Duration(seconds: 60));
 
-    if (candidates is List && candidates.isNotEmpty) {
-      final candidate = candidates.first as Map<String, dynamic>;
-      final content = candidate['content'];
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
 
-      if (content is Map<String, dynamic>) {
-        final parts = content['parts'];
+          final candidates = data['candidates'];
 
-        if (parts is List) {
-          for (final part in parts) {
-            if (part is Map<String, dynamic>) {
-              final text = part['text'];
+          if (candidates is List && candidates.isNotEmpty) {
+            final candidate = candidates.first as Map<String, dynamic>;
 
-              if (text is String && text.trim().isNotEmpty) {
-                return text.trim();
+            final content = candidate['content'];
+
+            if (content is Map<String, dynamic>) {
+              final parts = content['parts'];
+
+              if (parts is List) {
+                for (final part in parts) {
+                  if (part is Map<String, dynamic>) {
+                    final text = part['text'];
+
+                    if (text is String && text.trim().isNotEmpty) {
+                      return text.trim();
+                    }
+                  }
+                }
               }
             }
           }
+
+          return 'Gemini returned no text response.';
         }
+
+        final error = Exception(
+          'Gemini request failed (${response.statusCode}): '
+          '${response.body}',
+        );
+
+        lastError = error;
+
+        // 503 = temporary service unavailability.
+        // Retry instead of immediately failing ETHER.
+        if (response.statusCode == 503 && attempt < 3) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+
+        throw error;
+      } on TimeoutException catch (e) {
+        lastError = Exception('Gemini request timed out: $e');
+
+        if (attempt < 3) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+
+        throw lastError;
+      } catch (e) {
+        lastError = Exception(e.toString());
+
+        if (attempt < 3) {
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+
+        throw lastError;
       }
     }
 
-    return 'Gemini returned no text response.';
+    throw lastError ?? Exception('Gemini request failed.');
   }
 }

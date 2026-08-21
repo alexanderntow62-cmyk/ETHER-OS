@@ -39,10 +39,8 @@ class _EtherHomeState extends State<EtherHome> {
   int selectedIndex = 0;
   final EtherAgent _etherAgent = EtherAgent();
   final EtherVoice _voice = EtherVoice();
-  final BusinessControlCenter _businessControlCenter =
-      BusinessControlCenter();
-  final TextEditingController _businessGoalController =
-      TextEditingController();
+  final BusinessControlCenter _businessControlCenter = BusinessControlCenter();
+  final TextEditingController _businessGoalController = TextEditingController();
   bool _businessRunning = false;
   bool _isListening = false;
   final TextEditingController _aiController = TextEditingController();
@@ -155,25 +153,446 @@ class _EtherHomeState extends State<EtherHome> {
   }
 
   Widget _corePanel() {
+    final pendingApprovals = _businessControlCenter.approvalQueue.pendingCount;
+    final workerRunning = _businessControlCenter.worker.isRunning;
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       children: [
-        _heroCard(),
-        const SizedBox(height: 16),
-        _sectionTitle('SYSTEM OVERVIEW'),
+        _coreHeroCard(),
+        const SizedBox(height: 18),
+
+        _sectionTitle('CORE INTELLIGENCE'),
         const SizedBox(height: 10),
-        _infoCard(
-          Icons.memory,
+
+        _coreStatusCard(
+          Icons.memory_rounded,
           'ETHER CORE',
-          'Core intelligence engine ready.',
+          'Core intelligence engine',
+          'OPERATIONAL',
         ),
-        _infoCard(Icons.auto_awesome, 'AI STATUS', 'AI subsystem initialized.'),
-        _infoCard(
-          Icons.business_center,
+
+        _coreStatusCard(
+          Icons.auto_awesome_rounded,
+          'AI ENGINE',
+          'AI reasoning and conversation',
+          'READY',
+        ),
+
+        _coreStatusCard(
+          Icons.psychology_rounded,
+          'AGENT',
+          'Task planning and execution',
+          'READY',
+        ),
+
+        _coreStatusCard(
+          Icons.business_center_rounded,
           'BUSINESS ENGINE',
-          'Business automation layer ready.',
+          'Autonomous business operations',
+          workerRunning ? 'RUNNING' : 'READY',
+        ),
+
+        const SizedBox(height: 14),
+        _sectionTitle('SYSTEM ACTIVITY'),
+        const SizedBox(height: 10),
+
+        Row(
+          children: [
+            Expanded(
+              child: _coreMetricCard(Icons.bolt_rounded, 'CORE', 'ONLINE'),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _coreMetricCard(
+                Icons.pending_actions_rounded,
+                'APPROVALS',
+                '$pendingApprovals',
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 10),
+
+        Row(
+          children: [
+            Expanded(
+              child: _coreMetricCard(
+                Icons.work_history_rounded,
+                'WORKER',
+                workerRunning ? 'ACTIVE' : 'IDLE',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _coreMetricCard(
+                Icons.security_rounded,
+                'SAFETY',
+                'ACTIVE',
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+        _sectionTitle('QUICK ACTIONS'),
+        const SizedBox(height: 10),
+
+        _coreActionCard(
+          Icons.chat_bubble_outline_rounded,
+          'TALK TO ETHER',
+          'Open the AI Core and communicate with ETHER.',
+          const Color(0xFF00E5FF),
+          () {
+            setState(() {
+              selectedIndex = 1;
+            });
+          },
+        ),
+
+        _coreActionCard(
+          Icons.business_center_outlined,
+          'BUSINESS CONTROL',
+          'Launch business intelligence and automation.',
+          const Color(0xFF7C4DFF),
+          () {
+            setState(() {
+              selectedIndex = 2;
+            });
+          },
+        ),
+
+        _coreActionCard(
+          Icons.settings_outlined,
+          'SYSTEM CONTROL',
+          'View system controls and connected services.',
+          const Color(0xFF00E5FF),
+          () {
+            setState(() {
+              selectedIndex = 3;
+            });
+          },
+        ),
+
+        const SizedBox(height: 18),
+
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFF0B0F18),
+            border: Border.all(
+              color: const Color(0xFFFFC107).withValues(alpha: 0.22),
+            ),
+          ),
+          child: const Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.shield_outlined, color: Color(0xFFFFC107), size: 24),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ETHER SAFETY BOUNDARY',
+                      style: TextStyle(
+                        color: Color(0xFFFFC107),
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    SizedBox(height: 7),
+                    Text(
+                      'ETHER can prepare and execute non-financial work autonomously. Financial actions require explicit user approval.',
+                      style: TextStyle(
+                        color: Colors.white60,
+                        height: 1.5,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _coreHeroCard() {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: const Color(0xFF00E5FF).withValues(alpha: 0.28),
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF00E5FF).withValues(alpha: 0.13),
+            const Color(0xFF7C4DFF).withValues(alpha: 0.10),
+            const Color(0xFF05070D),
+          ],
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: const Color(0xFF00E5FF).withValues(alpha: 0.08),
+                  border: Border.all(
+                    color: const Color(0xFF00E5FF).withValues(alpha: 0.45),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.hub_rounded,
+                  color: Color(0xFF00E5FF),
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 15),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ETHER CORE',
+                      style: TextStyle(
+                        fontSize: 21,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.8,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'INTELLIGENT OPERATING SYSTEM',
+                      style: TextStyle(
+                        fontSize: 9,
+                        letterSpacing: 1.3,
+                        color: Colors.white54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: const Color(0xFF00E5FF).withValues(alpha: 0.08),
+                  border: Border.all(
+                    color: const Color(0xFF00E5FF).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.circle, size: 7, color: Color(0xFF00E5FF)),
+                    SizedBox(width: 5),
+                    Text(
+                      'ONLINE',
+                      style: TextStyle(
+                        fontSize: 8,
+                        color: Color(0xFF00E5FF),
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            'SYSTEM OPERATIONAL',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'ETHER is connected to the AI, agent, and business intelligence subsystems.',
+            style: TextStyle(color: Colors.white60, height: 1.5, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _coreStatusCard(
+    IconData icon,
+    String title,
+    String description,
+    String status,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B0F18),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(13),
+              color: const Color(0xFF00E5FF).withValues(alpha: 0.07),
+            ),
+            child: Icon(icon, color: const Color(0xFF00E5FF), size: 23),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: const TextStyle(fontSize: 11, color: Colors.white54),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            status,
+            style: const TextStyle(
+              color: Color(0xFF00E5FF),
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _coreMetricCard(IconData icon, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B0F18),
+        borderRadius: BorderRadius.circular(17),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: const Color(0xFF00E5FF), size: 21),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white54,
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _coreActionCard(
+    IconData icon,
+    String title,
+    String description,
+    Color accent,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0B0F18),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: accent.withValues(alpha: 0.22)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                color: accent.withValues(alpha: 0.08),
+              ),
+              child: Icon(icon, color: accent, size: 24),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 11,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: accent.withValues(alpha: 0.7),
+              size: 15,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -621,9 +1040,7 @@ class _EtherHomeState extends State<EtherHome> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.play_arrow_rounded),
                   label: Text(
@@ -672,21 +1089,16 @@ class _EtherHomeState extends State<EtherHome> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: const Color(0xFF0B0F18),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
           ),
           child: Text(
             _businessControlCenter.activity.isEmpty
                 ? 'No business activity yet.'
                 : _businessControlCenter.activity
-                    .takeLast(10)
-                    .map((entry) => '• $entry')
-                    .join('\n'),
-            style: const TextStyle(
-              color: Colors.white70,
-              height: 1.5,
-            ),
+                      .takeLast(10)
+                      .map((entry) => '• $entry')
+                      .join('\n'),
+            style: const TextStyle(color: Colors.white70, height: 1.5),
           ),
         ),
 
@@ -703,10 +1115,7 @@ class _EtherHomeState extends State<EtherHome> {
           child: const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.security_outlined,
-                color: Color(0xFFFFC107),
-              ),
+              Icon(Icons.security_outlined, color: Color(0xFFFFC107)),
               SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -714,10 +1123,7 @@ class _EtherHomeState extends State<EtherHome> {
                   'ETHER cannot spend money, make purchases, '
                   'or create financial commitments autonomously. '
                   'Financial actions require your approval.',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    height: 1.5,
-                  ),
+                  style: TextStyle(color: Colors.white70, height: 1.5),
                 ),
               ),
             ],
@@ -739,8 +1145,7 @@ class _EtherHomeState extends State<EtherHome> {
     });
 
     try {
-      final result =
-          await _businessControlCenter.runBusinessCheck(goal);
+      final result = await _businessControlCenter.runBusinessCheck(goal);
 
       if (!mounted) {
         return;
@@ -756,10 +1161,7 @@ class _EtherHomeState extends State<EtherHome> {
             content: SingleChildScrollView(
               child: Text(
                 result,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  height: 1.5,
-                ),
+                style: const TextStyle(color: Colors.white70, height: 1.5),
               ),
             ),
             actions: [
@@ -776,11 +1178,9 @@ class _EtherHomeState extends State<EtherHome> {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Business error: $error'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Business error: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -868,9 +1268,7 @@ class _EtherHomeState extends State<EtherHome> {
 
     if (queue.items.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No approval requests pending.'),
-        ),
+        const SnackBar(content: Text('No approval requests pending.')),
       );
       return;
     }
@@ -880,9 +1278,7 @@ class _EtherHomeState extends State<EtherHome> {
       backgroundColor: const Color(0xFF0B0F18),
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) {
         return SafeArea(
@@ -903,9 +1299,7 @@ class _EtherHomeState extends State<EtherHome> {
                 const SizedBox(height: 8),
                 Text(
                   '${queue.pendingCount} item(s) need your attention.',
-                  style: const TextStyle(
-                    color: Colors.white54,
-                  ),
+                  style: const TextStyle(color: Colors.white54),
                 ),
                 const SizedBox(height: 18),
 
@@ -917,8 +1311,7 @@ class _EtherHomeState extends State<EtherHome> {
                       color: const Color(0xFF05070D),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: const Color(0xFFFFC107)
-                            .withValues(alpha: 0.25),
+                        color: const Color(0xFFFFC107).withValues(alpha: 0.25),
                       ),
                     ),
                     child: Column(
@@ -956,15 +1349,14 @@ class _EtherHomeState extends State<EtherHome> {
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed: () async {
-                                  final approved = await
-                                      _businessControlCenter.approve(task);
+                                  final approved = await _businessControlCenter
+                                      .approve(task);
 
                                   Navigator.pop(sheetContext);
 
                                   if (approved && mounted) {
                                     setState(() {});
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           'Business action approved.',
@@ -973,9 +1365,7 @@ class _EtherHomeState extends State<EtherHome> {
                                     );
                                   }
                                 },
-                                icon: const Icon(
-                                  Icons.check_rounded,
-                                ),
+                                icon: const Icon(Icons.check_rounded),
                                 label: const Text('APPROVE'),
                               ),
                             ),
@@ -983,15 +1373,14 @@ class _EtherHomeState extends State<EtherHome> {
                             Expanded(
                               child: OutlinedButton.icon(
                                 onPressed: () async {
-                                  final rejected =
-                                      _businessControlCenter.reject(task);
+                                  final rejected = _businessControlCenter
+                                      .reject(task);
 
                                   Navigator.pop(sheetContext);
 
                                   if (rejected && mounted) {
                                     setState(() {});
-                                    ScaffoldMessenger.of(context)
-                                        .showSnackBar(
+                                    ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
                                           'Business action rejected.',
@@ -1000,9 +1389,7 @@ class _EtherHomeState extends State<EtherHome> {
                                     );
                                   }
                                 },
-                                icon: const Icon(
-                                  Icons.close_rounded,
-                                ),
+                                icon: const Icon(Icons.close_rounded),
                                 label: const Text('REJECT'),
                               ),
                             ),
@@ -1019,7 +1406,6 @@ class _EtherHomeState extends State<EtherHome> {
       },
     );
   }
-
 
   Widget _infoCard(
     IconData icon,
@@ -1058,19 +1444,13 @@ class _EtherHomeState extends State<EtherHome> {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white54,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.white54),
                 ),
               ],
             ),
           ),
           if (enabled)
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: Colors.white54,
-            ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white54),
         ],
       ),
     );
@@ -1079,10 +1459,7 @@ class _EtherHomeState extends State<EtherHome> {
       return card;
     }
 
-    return GestureDetector(
-      onTap: onTap,
-      child: card,
-    );
+    return GestureDetector(onTap: onTap, child: card);
   }
 
   Widget _bottomNavigation() {
