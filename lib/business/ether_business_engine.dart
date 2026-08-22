@@ -107,6 +107,34 @@ class EtherBusinessEngine {
         return task.result;
       }
 
+      if (step.integrationId != null && step.action != null) {
+        final integrationResult = await executeIntegration(
+          task: task,
+          integrationId: step.integrationId!,
+          action: step.action!,
+        );
+
+        if (!integrationResult.success) {
+          lines.add('');
+          lines.add('INTEGRATION STOPPED');
+          lines.add('Step: ${step.title}');
+          lines.add('Integration: ${step.integrationId}');
+          lines.add('Action: ${step.action}');
+          lines.add('Reason: ${integrationResult.message}');
+
+          task.result = lines.join('\n');
+
+          return task.result;
+        }
+
+        lines.add('${step.id} — ${step.title}');
+        lines.add('  INTEGRATION EXECUTED');
+        lines.add('  Integration: ${step.integrationId}');
+        lines.add('  Action: ${step.action}');
+        lines.add('  ${integrationResult.message}');
+        continue;
+      }
+
       lines.add('${step.id} — ${step.title}');
       lines.add('  EXECUTED');
       lines.add('  ${step.description}');
