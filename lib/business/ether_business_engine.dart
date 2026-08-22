@@ -132,6 +132,21 @@ class EtherBusinessEngine {
       );
     }
 
+    // Fail closed: an integration may only execute actions
+    // that it explicitly declares as supported capabilities.
+    if (!integrations.supportsAction(
+      integrationId: integrationId,
+      action: action,
+    )) {
+      return BusinessIntegrationResult.failure(
+        integration: integrationId,
+        action: action,
+        message:
+            'ACTION NOT SUPPORTED. '
+            'Integration "$integrationId" does not declare action "$action".',
+      );
+    }
+
     final risk = integrationActionPolicy.classify(
       integrationId: integrationId,
       action: action,

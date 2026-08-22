@@ -132,6 +132,26 @@ void main() {
       expect(integration.lastAction, isNull);
     });
 
+    test('unsupported integration action is blocked before execution', () async {
+      final task = engine.createTask(
+        id: 'unsupported_1',
+        goal: 'Attempt unsupported integration action',
+      );
+
+      task.approve();
+
+      final result = await engine.executeIntegration(
+        task: task,
+        integrationId: 'woocommerce',
+        action: 'create_product',
+      );
+
+      expect(result.success, isFalse);
+      expect(result.message, contains('ACTION NOT SUPPORTED'));
+      expect(result.message, contains('create_product'));
+      expect(integration.lastAction, isNull);
+    });
+
     test('unknown integration returns failure without execution', () async {
       final task = engine.createTask(
         id: 'unknown_1',
