@@ -6,11 +6,24 @@ class BusinessPlanStep {
   final String description;
   final BusinessPermission permission;
 
+  /// Optional integration this step is intended to use.
+  ///
+  /// This is planning metadata only. Execution must still pass through
+  /// EtherBusinessEngine's integration capability and safety gates.
+  final String? integrationId;
+
+  /// Optional integration action this step is intended to perform.
+  ///
+  /// This must be validated against the integration registry before execution.
+  final String? action;
+
   const BusinessPlanStep({
     required this.id,
     required this.title,
     required this.description,
     this.permission = BusinessPermission.autonomous,
+    this.integrationId,
+    this.action,
   });
 }
 
