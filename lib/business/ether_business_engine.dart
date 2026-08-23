@@ -22,14 +22,31 @@ class EtherBusinessEngine {
     BusinessExecutionGate? executionGate,
     BusinessIntegrationRegistry? integrations,
     BusinessIntegrationActionPolicy? integrationActionPolicy,
-  })  : planner = planner ?? EtherBusinessPlanner(),
-        approvalQueue = approvalQueue ?? BusinessApprovalQueue(),
-        executionGate = executionGate ?? BusinessExecutionGate(),
-        integrations =
-            integrations ?? BusinessIntegrationRegistry(),
-        integrationActionPolicy =
-            integrationActionPolicy ??
-                const BusinessIntegrationActionPolicy();
+  }) : planner = planner ?? EtherBusinessPlanner(),
+       approvalQueue = approvalQueue ?? BusinessApprovalQueue(),
+       executionGate = executionGate ?? BusinessExecutionGate(),
+       integrations = integrations ?? BusinessIntegrationRegistry(),
+       integrationActionPolicy =
+           integrationActionPolicy ?? const BusinessIntegrationActionPolicy();
+
+  /// Creates a business engine with integrations initialized
+  /// from ETHER-OS secure credential storage.
+  static Future<EtherBusinessEngine> fromSecureStorage({
+    EtherBusinessPlanner? planner,
+    BusinessApprovalQueue? approvalQueue,
+    BusinessExecutionGate? executionGate,
+    BusinessIntegrationActionPolicy? integrationActionPolicy,
+  }) async {
+    final integrations = await BusinessIntegrationRegistry.fromSecureStorage();
+
+    return EtherBusinessEngine(
+      planner: planner,
+      approvalQueue: approvalQueue,
+      executionGate: executionGate,
+      integrations: integrations,
+      integrationActionPolicy: integrationActionPolicy,
+    );
+  }
 
   List<BusinessTask> get tasks => List.unmodifiable(_tasks);
 
@@ -38,11 +55,7 @@ class EtherBusinessEngine {
     required String goal,
     BusinessPermission permission = BusinessPermission.autonomous,
   }) {
-    final task = BusinessTask(
-      id: id,
-      goal: goal,
-      permission: permission,
-    );
+    final task = BusinessTask(id: id, goal: goal, permission: permission);
 
     _tasks.add(task);
     return task;
@@ -140,10 +153,7 @@ class EtherBusinessEngine {
       lines.add('  ${step.description}');
     }
 
-    return executionGate.execute(
-      task,
-      executionResult: lines.join('\n'),
-    );
+    return executionGate.execute(task, executionResult: lines.join('\n'));
   }
 
   Future<BusinessIntegrationResult> executeIntegration({
@@ -234,14 +244,8 @@ class EtherBusinessEngine {
     return true;
   }
 
-  bool rejectTask(
-    BusinessTask task, {
-    String reason = 'Rejected by user.',
-  }) {
-    return approvalQueue.reject(
-      task,
-      reason: reason,
-    );
+  bool rejectTask(BusinessTask task, {String reason = 'Rejected by user.'}) {
+    return approvalQueue.reject(task, reason: reason);
   }
 
   int get pendingApprovalCount => approvalQueue.pendingCount;
