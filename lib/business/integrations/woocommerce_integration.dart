@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import 'business_integration.dart';
 import 'business_integration_result.dart';
+import '../security/ether_secure_credentials.dart';
 
 class WooCommerceIntegration implements BusinessIntegration {
   final String? storeUrl;
@@ -17,6 +18,34 @@ class WooCommerceIntegration implements BusinessIntegration {
     this.consumerSecret,
     http.Client? client,
   }) : client = client ?? http.Client();
+
+  /// Creates a WooCommerce integration using credentials stored
+  /// in ETHER-OS secure storage.
+  static Future<WooCommerceIntegration> fromSecureStorage({
+    http.Client? client,
+  }) async {
+    final storeUrl = await EtherSecureCredentials.read(
+      integration: 'woocommerce',
+      field: 'store_url',
+    );
+
+    final consumerKey = await EtherSecureCredentials.read(
+      integration: 'woocommerce',
+      field: 'consumer_key',
+    );
+
+    final consumerSecret = await EtherSecureCredentials.read(
+      integration: 'woocommerce',
+      field: 'consumer_secret',
+    );
+
+    return WooCommerceIntegration(
+      storeUrl: storeUrl,
+      consumerKey: consumerKey,
+      consumerSecret: consumerSecret,
+      client: client,
+    );
+  }
 
   @override
   String get id => 'woocommerce';

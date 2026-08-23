@@ -22,6 +22,27 @@ class BusinessIntegrationRegistry {
     }
   }
 
+  /// Creates a registry with integrations loaded from secure storage.
+  ///
+  /// Existing constructor behavior remains unchanged so tests and callers
+  /// that provide integrations directly continue to work.
+  static Future<BusinessIntegrationRegistry> fromSecureStorage() async {
+    final registry = BusinessIntegrationRegistry(
+      integrations: const [],
+    );
+
+    registry.register(
+      await WooCommerceIntegration.fromSecureStorage(),
+    );
+
+    // Shopify and Printful remain available with their existing
+    // configuration paths until their secure-storage loaders are added.
+    registry.register(const ShopifyIntegration());
+    registry.register(const PrintfulIntegration());
+
+    return registry;
+  }
+
   void register(BusinessIntegration integration) {
     _integrations[integration.id] = integration;
   }
