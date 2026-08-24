@@ -19,15 +19,33 @@ class BusinessControlCenter {
   }) {
     this.approvalQueue = approvalQueue ?? BusinessApprovalQueue();
 
-    this.operator = operator ??
+    this.operator =
+        operator ??
         EtherBusinessOperator(
-          business: EtherBusinessEngine(
-            approvalQueue: this.approvalQueue,
-          ),
+          business: EtherBusinessEngine(approvalQueue: this.approvalQueue),
         );
 
-    this.worker =
-        worker ?? EtherBusinessWorker(operator: this.operator);
+    this.worker = worker ?? EtherBusinessWorker(operator: this.operator);
+  }
+
+  /// Creates a Business Control Center using integrations
+  /// initialized from ETHER-OS secure credential storage.
+  static Future<BusinessControlCenter> fromSecureStorage() async {
+    final approvalQueue = BusinessApprovalQueue();
+
+    final business = await EtherBusinessEngine.fromSecureStorage(
+      approvalQueue: approvalQueue,
+    );
+
+    final operator = EtherBusinessOperator(business: business);
+
+    final worker = EtherBusinessWorker(operator: operator);
+
+    return BusinessControlCenter(
+      operator: operator,
+      worker: worker,
+      approvalQueue: approvalQueue,
+    );
   }
 
   List<String> get businesses => List.unmodifiable(_businesses);
