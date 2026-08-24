@@ -36,10 +36,37 @@ class EtherHome extends StatefulWidget {
 }
 
 class _EtherHomeState extends State<EtherHome> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Start with a safe local control center so the UI can build immediately.
+    _businessControlCenter = BusinessControlCenter();
+
+    // Replace it with the secure-storage initialized version when ready.
+    _initializeBusinessControlCenter();
+  }
+
+  Future<void> _initializeBusinessControlCenter() async {
+    try {
+      final center = await BusinessControlCenter.fromSecureStorage();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _businessControlCenter = center;
+      });
+    } catch (error) {
+      debugPrint('Business Control Center initialization failed: $error');
+    }
+  }
+
   int selectedIndex = 0;
   final EtherAgent _etherAgent = EtherAgent();
   final EtherVoice _voice = EtherVoice();
-  final BusinessControlCenter _businessControlCenter = BusinessControlCenter();
+  late BusinessControlCenter _businessControlCenter;
   final TextEditingController _businessGoalController = TextEditingController();
   bool _businessRunning = false;
   bool _isListening = false;
