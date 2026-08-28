@@ -8,6 +8,10 @@ class CalculatorSkill implements EtherSkill {
   String get name => 'Calculator';
 
   @override
+  String get description =>
+      'Performs arithmetic calculations and evaluates mathematical expressions.';
+
+  @override
   bool canHandle(String input) {
     final text = input.toLowerCase().trim();
 

@@ -1,37 +1,30 @@
-import '../ai/brain/ether_brain.dart';
-import '../business/ether_business_engine.dart';
-import '../business/ether_business_operator.dart';
-import 'ether_executor.dart';
-import 'ether_plan.dart';
-import 'ether_planner.dart';
+import '../fek/ether_fek_coordinator.dart';
 
+/// ETHER's top-level agent.
+///
+/// The agent is intentionally thin:
+/// - FEKCoordinator owns routing.
+/// - Core FEK owns intelligence and memory.
+/// - Action FEK owns planning/execution.
+/// - Business FEK owns autonomous business operations.
+///
+/// This prevents duplicate brains, planners, executors, and business
+/// engines from being created at the top level.
 class EtherAgent {
-  final EtherBrain brain;
-  final EtherBusinessEngine business;
-  final EtherBusinessOperator businessOperator;
-
-  late final EtherPlanner planner;
-  late final EtherExecutor executor;
+  final EtherFEKCoordinator fek;
 
   bool _initialized = false;
 
   EtherAgent({
-    EtherBrain? brain,
-    EtherBusinessEngine? business,
-    EtherBusinessOperator? businessOperator,
-  }) : brain = brain ?? EtherBrain(),
-       business = business ?? EtherBusinessEngine(),
-       businessOperator = businessOperator ?? EtherBusinessOperator() {
-    planner = EtherPlanner();
-    executor = EtherExecutor(brain: this.brain);
-  }
+    EtherFEKCoordinator? fek,
+  }) : fek = fek ?? EtherFEKCoordinator();
 
   Future<void> initialize() async {
     if (_initialized) {
       return;
     }
 
-    await brain.initialize();
+    await fek.initialize();
     _initialized = true;
   }
 
@@ -41,72 +34,9 @@ class EtherAgent {
     final input = goal.trim();
 
     if (input.isEmpty) {
-      return 'ETHER Agent is ready. Give me a goal.';
+      return 'ETHER is ready. What can I help you with?';
     }
 
-    final lower = input.toLowerCase();
-
-    if (_isBusinessRequest(lower)) {
-      return businessOperator.start(input);
-    }
-
-    final EtherPlan plan = planner.createPlan(input);
-
-    if (plan.tasks.isEmpty) {
-      return 'ETHER could not create a plan for that goal.';
-    }
-
-    final completedPlan = await executor.execute(plan);
-
-    final lines = <String>[
-      'ETHER AGENT',
-      '',
-      'Goal: ${completedPlan.goal}',
-      '',
-      'Tasks:',
-    ];
-
-    for (final task in completedPlan.tasks) {
-      lines.add('${task.id} — ${task.status.name.toUpperCase()}');
-
-      lines.add('  ${task.goal}');
-
-      if (task.result.isNotEmpty) {
-        lines.add('  Result: ${task.result}');
-      }
-    }
-
-    if (completedPlan.hasFailed) {
-      lines.add('');
-      lines.add('Status: FAILED');
-    } else if (completedPlan.isComplete) {
-      lines.add('');
-      lines.add('Status: COMPLETED');
-    }
-
-    return lines.join('\n');
-  }
-
-  bool _isBusinessRequest(String input) {
-    const businessTerms = [
-      'business',
-      'dropshipping',
-      'drop shipping',
-      'product research',
-      'sell products',
-      'selling products',
-      'store',
-      'supplier',
-      'revenue',
-      'business plan',
-      'online store',
-      'ecommerce',
-      'e-commerce',
-      'shopify',
-      'shop',
-      'website',
-    ];
-
-    return businessTerms.any(input.contains);
+    return fek.process(input);
   }
 }
