@@ -4,7 +4,6 @@ import '../ai/brain/ether_brain.dart';
 import 'core/ether_core_fek.dart';
 import 'action/ether_action_fek.dart';
 import 'business/ether_business_fek.dart';
-import '../business/ether_autonomous_business_loop.dart';
 
 enum EtherFEKType { core, action, business }
 
@@ -22,7 +21,6 @@ class EtherFEKCoordinator {
   final EtherActionFEK action;
   final EtherBusinessFEK business;
   final EtherPlanner planner;
-  final EtherAutonomousBusinessLoop autonomousBusiness;
 
   factory EtherFEKCoordinator({
     EtherBrain? brain,
@@ -30,7 +28,6 @@ class EtherFEKCoordinator {
     EtherActionFEK? action,
     EtherBusinessFEK? business,
     EtherPlanner? planner,
-    EtherAutonomousBusinessLoop? autonomousBusiness,
   }) {
     final sharedBrain = brain ?? EtherBrain();
 
@@ -40,8 +37,6 @@ class EtherFEKCoordinator {
       action: action ?? EtherActionFEK(brain: sharedBrain),
       business: business ?? EtherBusinessFEK(),
       planner: planner ?? EtherPlanner(),
-      autonomousBusiness:
-          autonomousBusiness ?? EtherAutonomousBusinessLoop(brain: sharedBrain),
     );
   }
 
@@ -51,7 +46,6 @@ class EtherFEKCoordinator {
     required this.action,
     required this.business,
     required this.planner,
-    required this.autonomousBusiness,
   });
 
   Future<void> initialize() async {
@@ -131,7 +125,7 @@ class EtherFEKCoordinator {
       return process(request);
     }
 
-    return autonomousBusiness.run(request);
+    return business.runAutonomyText(goal: request);
   }
 
   Future<String> process(String input) async {

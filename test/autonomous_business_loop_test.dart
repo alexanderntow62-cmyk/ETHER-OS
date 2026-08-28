@@ -14,9 +14,13 @@ void main() {
       'start a dropshipping business',
     );
 
-    expect(result, contains('AUTONOMOUS BUSINESS LOOP'));
+    expect(result, contains('ETHER BUSINESS AUTONOMY LOOP'));
     expect(result, contains('Goal: start a dropshipping business'));
-    expect(result, contains('LOOP'));
+    expect(result, contains('OBSERVE'));
+    expect(result, contains('DECIDE'));
+    expect(result, contains('PLAN + EXECUTE'));
+    expect(result, contains('MEASURE'));
+    expect(result, contains('LEARN'));
   });
 
   test('autonomous business loop stops at financial boundary', () async {
@@ -26,18 +30,22 @@ void main() {
       'start a dropshipping business',
     );
 
-    expect(result, contains('WAITING FOR APPROVAL'));
+    expect(result, contains('STOPPED AT FINANCIAL BOUNDARY'));
+    expect(result, contains('APPROVAL REQUIRED'));
     expect(result, contains('FINANCIAL'));
+    expect(
+      result,
+      contains(
+        'No purchases, payments, subscriptions, or financial commitments were made.',
+      ),
+    );
     expect(result.toLowerCase(), contains('approval'));
-    expect(result, contains('Financial actions performed: 0'));
   });
 
   test('non-business request still uses normal FEK routing', () async {
     final fek = EtherFEKCoordinator();
 
-    final result = await fek.runAutonomousBusinessLoop(
-      'calculate 25 times 4',
-    );
+    final result = await fek.runAutonomousBusinessLoop('calculate 25 times 4');
 
     expect(result, contains('100'));
   });
