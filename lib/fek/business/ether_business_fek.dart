@@ -1,40 +1,119 @@
+import '../../agent/ether_plan.dart';
+import '../../agent/ether_task.dart';
+import '../../business/business_decision_engine.dart';
+import '../../business/business_state.dart';
+import '../../business/ether_business_autonomy_loop.dart';
 import '../../business/ether_business_engine.dart';
 import '../../business/ether_business_operator.dart';
+import '../action/ether_action_fek.dart';
 
-/// FEK-3: Business & Autonomous Operations
+/// FEK-3: Business & Autonomous Operations.
 ///
-/// Handles ETHER's business-operation layer:
-/// - business workflows
-/// - business operations
-/// - autonomous business tasks
-/// - long-running business processes
+/// FEK-3 owns business-level observation, decision-making, planning,
+/// execution coordination, measurement, learning, and approval boundaries.
 ///
-/// Financial actions remain protected by the business permission boundary.
+/// FEK-3 delegates executable actions to FEK-2.
 class EtherBusinessFEK {
   final EtherBusinessEngine business;
   final EtherBusinessOperator operator;
+  final EtherBusinessAutonomyLoop autonomy;
 
   factory EtherBusinessFEK({
     EtherBusinessEngine? business,
     EtherBusinessOperator? operator,
+    EtherBusinessAutonomyLoop? autonomy,
   }) {
-    final sharedBusiness = business ?? EtherBusinessEngine();
+    final sharedBusiness =
+        business ?? operator?.business ?? EtherBusinessEngine();
+
+    final sharedOperator =
+        operator ?? EtherBusinessOperator(business: sharedBusiness);
+
+    final sharedAutonomy =
+        autonomy ?? EtherBusinessAutonomyLoop(operator: sharedOperator);
 
     return EtherBusinessFEK._(
       business: sharedBusiness,
-      operator: operator ??
-          EtherBusinessOperator(
-            business: sharedBusiness,
-          ),
+      operator: sharedOperator,
+      autonomy: sharedAutonomy,
     );
   }
 
   EtherBusinessFEK._({
     required this.business,
     required this.operator,
+    required this.autonomy,
   });
 
   Future<String> start(String request) async {
     return operator.start(request);
+  }
+
+  Future<BusinessLoopResult> runAutonomy({
+    required String goal,
+    BusinessState? state,
+  }) async {
+    return autonomy.run(goal: goal, state: state ?? operator.state);
+  }
+
+  Future<String> runAutonomyText({
+    required String goal,
+    BusinessState? state,
+  }) async {
+    final result = await runAutonomy(goal: goal, state: state);
+
+    return result.toString();
+  }
+
+  /// Connects FEK-3 business orchestration to FEK-2 execution.
+  ///
+  /// Financial actions are blocked before FEK-2 receives the task.
+  Future<String> executeWithActionFEK({
+    required String goal,
+    required EtherActionFEK actionFEK,
+    BusinessState? state,
+  }) async {
+    final businessState = state ?? operator.state;
+
+    final decision = EtherBusinessDecisionEngine().decide(
+      goal: goal,
+      state: businessState,
+    );
+
+    if (decision.requiresApproval) {
+      return [
+        'ETHER BUSINESS FEK',
+        '',
+        'APPROVAL REQUIRED',
+        decision.reason,
+        '',
+        'ETHER will not execute the financial action automatically.',
+      ].join('\n');
+    }
+
+    final result = await actionFEK.execute(_createExecutionPlan(goal));
+
+    final outputs = result.tasks
+        .map((task) => task.result.trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+
+    return [
+      'ETHER BUSINESS FEK',
+      '',
+      'FEK-3 DECISION',
+      decision.toString(),
+      '',
+      'FEK-2 EXECUTION',
+      outputs.isEmpty
+          ? 'FEK-2 completed the permitted execution stage.'
+          : outputs.join('\n\n'),
+    ].join('\n');
+  }
+
+  EtherPlan _createExecutionPlan(String goal) {
+    final task = EtherTask(id: 'business_fek_action', goal: goal);
+
+    return EtherPlan(goal: goal, tasks: [task]);
   }
 }
