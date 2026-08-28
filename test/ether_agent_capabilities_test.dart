@@ -10,33 +10,40 @@ void main() {
         InMemorySharedPreferencesStore.empty();
   });
 
-  test('ETHER Agent executes calculator skill', () async {
+  test('ETHER Agent executes calculator skill normally', () async {
     final agent = EtherAgent();
 
     final result = await agent.run('calculate 25 times 4');
 
-    expect(result, contains('ETHER AGENT'));
-    expect(result, contains('COMPLETED'));
     expect(result, contains('100'));
+    expect(result, isNot(contains('ETHER AGENT')));
+    expect(result, isNot(contains('Goal:')));
+    expect(result, isNot(contains('Tasks:')));
+    expect(result, isNot(contains('COMPLETED')));
   });
 
-  test('ETHER Agent can report status', () async {
+  test('ETHER Agent can report status normally', () async {
     final agent = EtherAgent();
 
     final result = await agent.run('status');
 
-    expect(result, contains('ETHER AGENT'));
-    expect(result, contains('COMPLETED'));
-    expect(result.toLowerCase(), contains('status'));
+    expect(result.toLowerCase(), contains('ether'));
+    expect(result.toLowerCase(), contains('brain: online'));
+    expect(result, isNot(contains('ETHER AGENT')));
+    expect(result, isNot(contains('Goal:')));
+    expect(result, isNot(contains('Tasks:')));
+    expect(result, isNot(contains('COMPLETED')));
   });
 
-  test('ETHER Agent can identify itself', () async {
+  test('ETHER Agent can identify itself normally', () async {
     final agent = EtherAgent();
 
     final result = await agent.run('who are you');
 
-    expect(result, contains('ETHER AGENT'));
-    expect(result, contains('COMPLETED'));
     expect(result.toLowerCase(), contains('ether'));
+    expect(result, isNot(contains('ETHER AGENT')));
+    expect(result, isNot(contains('Goal:')));
+    expect(result, isNot(contains('Tasks:')));
+    expect(result, isNot(contains('COMPLETED')));
   });
 }

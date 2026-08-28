@@ -11,13 +11,26 @@ class BusinessControlCenter {
   final List<String> _businesses = [];
   final List<String> _activity = [];
 
-  BusinessControlCenter({
+  factory BusinessControlCenter({
     EtherBusinessOperator? operator,
     EtherBusinessWorker? worker,
     BusinessApprovalQueue? approvalQueue,
-  }) : operator = operator ?? EtherBusinessOperator(),
-       worker = worker ?? EtherBusinessWorker(),
-       approvalQueue = approvalQueue ?? BusinessApprovalQueue();
+  }) {
+    final sharedOperator = operator ?? EtherBusinessOperator();
+
+    return BusinessControlCenter._(
+      operator: sharedOperator,
+      worker: worker ?? EtherBusinessWorker(operator: sharedOperator),
+      approvalQueue: approvalQueue ?? BusinessApprovalQueue(),
+    );
+  }
+
+  BusinessControlCenter._({
+    required this.operator,
+    required this.worker,
+    required this.approvalQueue,
+  });
+
 
   List<String> get businesses => List.unmodifiable(_businesses);
 
