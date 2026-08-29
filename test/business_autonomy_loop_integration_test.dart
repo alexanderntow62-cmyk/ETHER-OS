@@ -1,31 +1,38 @@
 import 'package:flutter_test/flutter_test.dart';
-
 import '../lib/business/business_state.dart';
 import '../lib/business/ether_business_autonomy_loop.dart';
-import '../lib/business/ether_business_operator.dart';
 
 void main() {
   test(
-    'business autonomy loop completes a non-financial business cycle',
+    'business autonomy loop prepares a non-financial business plan',
     () async {
       final state = BusinessState();
-
-      final loop = EtherBusinessAutonomyLoop(
-        operator: EtherBusinessOperator(state: state),
-      );
+      final loop = EtherBusinessAutonomyLoop();
 
       final result = await loop.run(
         goal: 'research profitable products',
         state: state,
       );
 
-      expect(result.stage, BusinessLoopStage.completed);
+      expect(result.stage, BusinessLoopStage.plan);
       expect(result.output, contains('OBSERVE'));
       expect(result.output, contains('DECIDE'));
-      expect(result.output, contains('PLAN + EXECUTE'));
-      expect(result.output, contains('MEASURE'));
-      expect(result.output, contains('LEARN'));
-      expect(result.output, contains('Recorded business cycle:'));
+      expect(result.output, contains('PLAN'));
+      expect(
+        result.output,
+        contains('FEK-3 created the authoritative business plan.'),
+      );
+      expect(
+        result.output,
+        contains('FEK-3 does not execute business tasks.'),
+      );
+      expect(result.output, contains('FEK-3 → FEK-2'));
+      expect(
+        result.output,
+        contains('FEK-2 receives the exact executable plan.'),
+      );
+      expect(result.plan, isNotNull);
+      expect(result.plan!.tasks, isNotEmpty);
     },
   );
 
@@ -33,31 +40,54 @@ void main() {
     'business autonomy loop stops financial actions before execution',
     () async {
       final state = BusinessState();
+      final loop = EtherBusinessAutonomyLoop();
 
-      final loop = EtherBusinessAutonomyLoop(
-        operator: EtherBusinessOperator(state: state),
+      final result = await loop.run(
+        goal: 'buy advertising',
+        state: state,
       );
 
-      final result = await loop.run(goal: 'buy advertising', state: state);
-
-      expect(result.stage, BusinessLoopStage.waitingApproval);
-      expect(result.output, contains('APPROVAL REQUIRED'));
+      expect(
+        result.stage,
+        BusinessLoopStage.waitingApproval,
+      );
       expect(
         result.output,
-        contains('will not perform the financial action automatically'),
+        contains('APPROVAL REQUIRED'),
+      );
+      expect(
+        result.output,
+        contains(
+          'will not perform the financial action automatically',
+        ),
+      );
+      expect(
+        result.output,
+        contains(
+          'No purchases, payments, subscriptions, or financial commitments were made.',
+        ),
       );
     },
   );
 
-  test('business state is shared with the business operator', () async {
-    final state = BusinessState();
+  test(
+    'business autonomy loop uses the supplied business state',
+    () async {
+      final state = BusinessState();
+      final loop = EtherBusinessAutonomyLoop();
 
-    final operator = EtherBusinessOperator(state: state);
+      final result = await loop.run(
+        goal: 'research profitable products',
+        state: state,
+      );
 
-    final loop = EtherBusinessAutonomyLoop(operator: operator);
-
-    await loop.run(goal: 'research profitable products', state: state);
-
-    expect(operator.state, same(state));
-  });
+      expect(result.stage, BusinessLoopStage.plan);
+      expect(
+        state.pendingActions,
+        contains(
+          'Review results of business cycle: research profitable products',
+        ),
+      );
+    },
+  );
 }
