@@ -34,8 +34,7 @@ class EtherBusinessFEK {
     final sharedOperator =
         operator ?? EtherBusinessOperator(business: sharedBusiness);
 
-    final sharedAutonomy =
-        autonomy ?? EtherBusinessAutonomyLoop();
+    final sharedAutonomy = autonomy ?? EtherBusinessAutonomyLoop();
 
     return EtherBusinessFEK._(
       business: sharedBusiness,
@@ -58,20 +57,14 @@ class EtherBusinessFEK {
     required String goal,
     BusinessState? state,
   }) async {
-    return autonomy.run(
-      goal: goal,
-      state: state ?? operator.state,
-    );
+    return autonomy.run(goal: goal, state: state ?? operator.state);
   }
 
   Future<String> runAutonomyText({
     required String goal,
     BusinessState? state,
   }) async {
-    final result = await runAutonomy(
-      goal: goal,
-      state: state,
-    );
+    final result = await runAutonomy(goal: goal, state: state);
 
     return result.toString();
   }
@@ -106,12 +99,7 @@ class EtherBusinessFEK {
 
     final plan = EtherPlan(
       goal: goal,
-      tasks: [
-        EtherTask(
-          id: 'business_fek_action',
-          goal: goal,
-        ),
-      ],
+      tasks: [EtherTask(id: 'business_fek_action', goal: goal)],
     );
 
     final result = await actionFEK.execute(plan);
@@ -133,5 +121,4 @@ class EtherBusinessFEK {
           : outputs.join('\n\n'),
     ].join('\n');
   }
-
 }

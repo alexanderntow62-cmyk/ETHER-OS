@@ -11,33 +11,24 @@ void main() {
   SharedPreferences.setMockInitialValues({});
 
   group('FEK-2 Skill and Tool Dispatch', () {
-    test('FEK-2 can execute a calculator task through the existing skill engine',
-        () async {
-      final brain = EtherBrain();
-      final action = EtherActionFEK(brain: brain);
+    test(
+      'FEK-2 can execute a calculator task through the existing skill engine',
+      () async {
+        final brain = EtherBrain();
+        final action = EtherActionFEK(brain: brain);
 
-      final plan = EtherPlan(
-        goal: 'calculate 25 times 4',
-        tasks: [
-          EtherTask(
-            id: 'calc_1',
-            goal: 'calculate 25 times 4',
-          ),
-        ],
-      );
+        final plan = EtherPlan(
+          goal: 'calculate 25 times 4',
+          tasks: [EtherTask(id: 'calc_1', goal: 'calculate 25 times 4')],
+        );
 
-      final result = await action.execute(plan);
+        final result = await action.execute(plan);
 
-      expect(
-        result.tasks.first.status,
-        EtherTaskStatus.completed,
-      );
+        expect(result.tasks.first.status, EtherTaskStatus.completed);
 
-      expect(
-        result.tasks.first.result,
-        contains('100'),
-      );
-    });
+        expect(result.tasks.first.result, contains('100'));
+      },
+    );
 
     test('FEK-2 exposes registered tool names', () {
       final brain = EtherBrain();
@@ -52,25 +43,14 @@ void main() {
 
       final plan = EtherPlan(
         goal: 'pay for advertising',
-        tasks: [
-          EtherTask(
-            id: 'finance_1',
-            goal: 'pay for advertising',
-          ),
-        ],
+        tasks: [EtherTask(id: 'finance_1', goal: 'pay for advertising')],
       );
 
       final result = await action.execute(plan);
 
-      expect(
-        result.tasks.first.status,
-        EtherTaskStatus.failed,
-      );
+      expect(result.tasks.first.status, EtherTaskStatus.failed);
 
-      expect(
-        result.tasks.first.result.toLowerCase(),
-        contains('approval'),
-      );
+      expect(result.tasks.first.result.toLowerCase(), contains('approval'));
     });
   });
 }

@@ -52,10 +52,7 @@ void main() {
       expect(result.tasks.length, 1);
       expect(
         result.tasks.first.status,
-        anyOf(
-          EtherTaskStatus.completed,
-          EtherTaskStatus.failed,
-        ),
+        anyOf(EtherTaskStatus.completed, EtherTaskStatus.failed),
       );
       expect(result.tasks.first.result, isNotEmpty);
     });

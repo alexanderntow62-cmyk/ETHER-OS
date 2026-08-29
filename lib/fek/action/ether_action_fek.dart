@@ -18,9 +18,7 @@ class EtherActionFEK {
   late final EtherExecutor executor;
   late final EtherBusinessExecutor businessExecutor;
 
-  EtherActionFEK({
-    required this.brain,
-  }) {
+  EtherActionFEK({required this.brain}) {
     executor = EtherExecutor(brain: brain);
     businessExecutor = EtherBusinessExecutor();
   }
@@ -58,9 +56,7 @@ class EtherActionFEK {
           final result = await businessExecutor.execute(task);
 
           if (result == null) {
-            task.fail(
-              'FEK-2 could not execute business task: ${task.goal}',
-            );
+            task.fail('FEK-2 could not execute business task: ${task.goal}');
           } else if (result.startsWith('FEK-2 BLOCKED')) {
             task.fail(result);
           } else {
@@ -79,12 +75,7 @@ class EtherActionFEK {
     }
 
     if (normalTasks.isNotEmpty) {
-      await executor.execute(
-        EtherPlan(
-          goal: plan.goal,
-          tasks: normalTasks,
-        ),
-      );
+      await executor.execute(EtherPlan(goal: plan.goal, tasks: normalTasks));
     }
 
     return plan;

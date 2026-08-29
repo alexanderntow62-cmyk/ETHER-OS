@@ -22,10 +22,7 @@ void main() {
         result.output,
         contains('FEK-3 created the authoritative business plan.'),
       );
-      expect(
-        result.output,
-        contains('FEK-3 does not execute business tasks.'),
-      );
+      expect(result.output, contains('FEK-3 does not execute business tasks.'));
       expect(result.output, contains('FEK-3 → FEK-2'));
       expect(
         result.output,
@@ -42,24 +39,13 @@ void main() {
       final state = BusinessState();
       final loop = EtherBusinessAutonomyLoop();
 
-      final result = await loop.run(
-        goal: 'buy advertising',
-        state: state,
-      );
+      final result = await loop.run(goal: 'buy advertising', state: state);
 
-      expect(
-        result.stage,
-        BusinessLoopStage.waitingApproval,
-      );
+      expect(result.stage, BusinessLoopStage.waitingApproval);
+      expect(result.output, contains('APPROVAL REQUIRED'));
       expect(
         result.output,
-        contains('APPROVAL REQUIRED'),
-      );
-      expect(
-        result.output,
-        contains(
-          'will not perform the financial action automatically',
-        ),
+        contains('will not perform the financial action automatically'),
       );
       expect(
         result.output,
@@ -70,24 +56,21 @@ void main() {
     },
   );
 
-  test(
-    'business autonomy loop uses the supplied business state',
-    () async {
-      final state = BusinessState();
-      final loop = EtherBusinessAutonomyLoop();
+  test('business autonomy loop uses the supplied business state', () async {
+    final state = BusinessState();
+    final loop = EtherBusinessAutonomyLoop();
 
-      final result = await loop.run(
-        goal: 'research profitable products',
-        state: state,
-      );
+    final result = await loop.run(
+      goal: 'research profitable products',
+      state: state,
+    );
 
-      expect(result.stage, BusinessLoopStage.plan);
-      expect(
-        state.pendingActions,
-        contains(
-          'Review results of business cycle: research profitable products',
-        ),
-      );
-    },
-  );
+    expect(result.stage, BusinessLoopStage.plan);
+    expect(
+      state.pendingActions,
+      contains(
+        'Review results of business cycle: research profitable products',
+      ),
+    );
+  });
 }

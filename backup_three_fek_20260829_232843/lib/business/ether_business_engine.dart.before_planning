@@ -1,0 +1,57 @@
+import 'business_permission.dart';
+import 'business_task.dart';
+
+class EtherBusinessEngine {
+  final List<BusinessTask> _tasks = [];
+
+  List<BusinessTask> get tasks => List.unmodifiable(_tasks);
+
+  BusinessTask createTask({
+    required String id,
+    required String goal,
+    BusinessPermission permission = BusinessPermission.autonomous,
+  }) {
+    final effectivePermission = permission == BusinessPermission.financial
+        ? BusinessPermission.financial
+        : permission;
+
+    final task = BusinessTask(
+      id: id,
+      goal: goal,
+      permission: effectivePermission,
+    );
+
+    _tasks.add(task);
+    return task;
+  }
+
+  Future<String> execute(BusinessTask task) async {
+    if (task.permission == BusinessPermission.financial) {
+      task.waitForApproval();
+
+      return 'APPROVAL REQUIRED\n'
+          'ETHER cannot execute financial actions autonomously.\n'
+          'Action: ${task.goal}';
+    }
+
+    if (task.permission == BusinessPermission.approvalRequired) {
+      task.waitForApproval();
+
+      return 'APPROVAL REQUIRED\n'
+          'ETHER prepared this business action but needs your approval.\n'
+          'Action: ${task.goal}';
+    }
+
+    task.start();
+
+    // Autonomous business execution will be added here.
+    // For now this establishes the safe execution boundary.
+    task.complete('Autonomous business task completed.');
+
+    return task.result;
+  }
+
+  void clearTasks() {
+    _tasks.clear();
+  }
+}

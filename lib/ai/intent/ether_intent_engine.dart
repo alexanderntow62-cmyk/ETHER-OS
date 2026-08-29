@@ -6,10 +6,7 @@ class EtherIntentEngine {
     final lower = text.toLowerCase();
 
     if (text.isEmpty) {
-      return EtherIntent(
-        type: EtherIntentType.unknown,
-        input: text,
-      );
+      return EtherIntent(type: EtherIntentType.unknown, input: text);
     }
 
     // Memory commands
@@ -21,10 +18,7 @@ class EtherIntentEngine {
         lower.startsWith("i'm learning ") ||
         lower.startsWith('i am building ') ||
         lower.startsWith("i'm building ")) {
-      return EtherIntent(
-        type: EtherIntentType.memory,
-        input: text,
-      );
+      return EtherIntent(type: EtherIntentType.memory, input: text);
     }
 
     // System actions
@@ -33,10 +27,7 @@ class EtherIntentEngine {
         lower.startsWith('start ') ||
         lower.contains('open booking.com') ||
         lower.contains('open settings')) {
-      return EtherIntent(
-        type: EtherIntentType.systemAction,
-        input: text,
-      );
+      return EtherIntent(type: EtherIntentType.systemAction, input: text);
     }
 
     // Business actions
@@ -45,15 +36,11 @@ class EtherIntentEngine {
         lower.contains('find a customer') ||
         lower.contains('find customers') ||
         lower.contains('business idea')) {
-      return EtherIntent(
-        type: EtherIntentType.businessAction,
-        input: text,
-      );
+      return EtherIntent(type: EtherIntentType.businessAction, input: text);
     }
 
     // Calculator / registered skills
-    if (RegExp(r'\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?')
-            .hasMatch(lower) ||
+    if (RegExp(r'\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?').hasMatch(lower) ||
         lower.startsWith('calculate ') ||
         lower.startsWith('compute ') ||
         lower.contains(' plus ') ||
@@ -61,10 +48,7 @@ class EtherIntentEngine {
         lower.contains(' times ') ||
         lower.contains(' multiplied by ') ||
         lower.contains(' divided by ')) {
-      return EtherIntent(
-        type: EtherIntentType.skill,
-        input: text,
-      );
+      return EtherIntent(type: EtherIntentType.skill, input: text);
     }
 
     // Normal conversation / questions
@@ -80,16 +64,10 @@ class EtherIntentEngine {
         lower.startsWith('when ') ||
         lower.startsWith('can you ') ||
         lower.startsWith('tell me ')) {
-      return EtherIntent(
-        type: EtherIntentType.conversation,
-        input: text,
-      );
+      return EtherIntent(type: EtherIntentType.conversation, input: text);
     }
 
     // Unknown requests can still go to the AI.
-    return EtherIntent(
-      type: EtherIntentType.unknown,
-      input: text,
-    );
+    return EtherIntent(type: EtherIntentType.unknown, input: text);
   }
 }

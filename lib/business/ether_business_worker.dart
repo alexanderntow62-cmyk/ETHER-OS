@@ -1,69 +1,86 @@
 import 'ether_business_operator.dart';
 
+/// Autonomous business worker used by FEK-3.
+///
+/// Responsibilities:
+/// - enforce the autonomous work window
+/// - invoke the business operator
+/// - expose worker state
+/// - never bypass the business/financial safety boundary
 class EtherBusinessWorker {
   final EtherBusinessOperator operator;
-  final Duration interval;
-  final Duration startTime;
-  final Duration endTime;
   final DateTime Function() clock;
 
   bool _running = false;
 
+  /// Default autonomous business window:
+  /// 06:30 -> 17:30 local time.
+  static const int workStartHour = 6;
+  static const int workStartMinute = 30;
+  static const int workEndHour = 17;
+  static const int workEndMinute = 30;
+
   EtherBusinessWorker({
     EtherBusinessOperator? operator,
-    this.interval = const Duration(minutes: 30),
-    this.startTime = const Duration(hours: 6, minutes: 30),
-    this.endTime = const Duration(hours: 17, minutes: 30),
     DateTime Function()? clock,
   }) : operator = operator ?? EtherBusinessOperator(),
        clock = clock ?? DateTime.now;
 
   bool get isRunning => _running;
 
-  bool isWithinWorkWindow(DateTime time) {
-    final current = Duration(hours: time.hour, minutes: time.minute);
+  bool isWithinWorkWindow([DateTime? now]) {
+    final time = now ?? clock();
 
-    return current >= startTime && current <= endTime;
+    final minutes = time.hour * 60 + time.minute;
+    const start = workStartHour * 60 + workStartMinute;
+    const end = workEndHour * 60 + workEndMinute;
+
+    return minutes >= start && minutes <= end;
   }
 
   Future<String> performCheck(String goal) async {
-    if (goal.trim().isEmpty) {
-      return 'ETHER WORKER\nNo task provided.';
+    final input = goal.trim();
+
+    if (input.isEmpty) {
+      return [
+        'ETHER BUSINESS WORKER',
+        'STATUS: NO GOAL',
+        'No business goal provided.',
+      ].join('\n');
     }
 
-    final now = clock();
-
-    if (!isWithinWorkWindow(now)) {
+    if (!isWithinWorkWindow()) {
       return [
-        'ETHER WORKER',
+        'ETHER BUSINESS WORKER',
         'STATUS: OUTSIDE WORK WINDOW',
         'Work window: 06:30–17:30',
-        'ETHER will wait for the next permitted work period.',
+        'No autonomous work performed.',
       ].join('\n');
     }
 
     _running = true;
 
     try {
-      final result = await operator.start(goal);
+      final result = await operator.start(input);
 
       return [
-        'ETHER AUTONOMOUS WORKER',
-        '',
-        'STATUS: WORK COMPLETED',
-        'Time: ${_formatTime(now)}',
+        'ETHER BUSINESS WORKER',
+        'STATUS: COMPLETED',
         '',
         result,
       ].join('\n');
+    } catch (error) {
+      return ['ETHER BUSINESS WORKER', 'STATUS: ERROR', '$error'].join('\n');
     } finally {
       _running = false;
     }
   }
 
-  String _formatTime(DateTime time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
+  Future<String> run(String goal) {
+    return performCheck(goal);
+  }
 
-    return '$hour:$minute';
+  void stop() {
+    _running = false;
   }
 }

@@ -1,9 +1,4 @@
-enum EtherTaskStatus {
-  pending,
-  running,
-  completed,
-  failed,
-}
+enum EtherTaskStatus { pending, running, completed, failed }
 
 enum EtherTaskType {
   general,
@@ -32,8 +27,7 @@ class EtherTask {
     this.result = '',
   });
 
-  bool get isFinancial =>
-      type == EtherTaskType.finance;
+  bool get isFinancial => type == EtherTaskType.finance;
 
   void start() {
     status = EtherTaskStatus.running;

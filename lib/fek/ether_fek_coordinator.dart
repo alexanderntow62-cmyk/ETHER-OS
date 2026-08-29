@@ -7,11 +7,7 @@ import 'core/ether_core_fek.dart';
 import 'action/ether_action_fek.dart';
 import 'business/ether_business_fek.dart';
 
-enum EtherFEKType {
-  core,
-  action,
-  business,
-}
+enum EtherFEKType { core, action, business }
 
 /// Central coordinator for ETHER's three FEKs.
 ///
@@ -51,11 +47,9 @@ class EtherFEKCoordinator {
   }) {
     final sharedBrain = brain ?? EtherBrain();
 
-    final sharedAction =
-        action ?? EtherActionFEK(brain: sharedBrain);
+    final sharedAction = action ?? EtherActionFEK(brain: sharedBrain);
 
-    final sharedBusiness =
-        business ?? EtherBusinessFEK();
+    final sharedBusiness = business ?? EtherBusinessFEK();
 
     final coordinator = EtherFEKCoordinator._(
       brain: sharedBrain,
@@ -65,8 +59,7 @@ class EtherFEKCoordinator {
       planner: planner ?? EtherPlanner(),
     );
 
-    coordinator.businessState =
-        businessState ?? BusinessState();
+    coordinator.businessState = businessState ?? BusinessState();
 
     return coordinator;
   }
@@ -128,8 +121,7 @@ class EtherFEKCoordinator {
     // FINANCIAL SAFETY BOUNDARY
     // ============================================================
 
-    if (businessResult.stage ==
-            BusinessLoopStage.waitingApproval ||
+    if (businessResult.stage == BusinessLoopStage.waitingApproval ||
         lower.contains('approval required') ||
         lower.contains('financial safety boundary') ||
         lower.contains('stopped at financial boundary')) {
@@ -164,9 +156,7 @@ class EtherFEKCoordinator {
 
     for (final task in completedPlan.tasks) {
       if (task.result.trim().isNotEmpty) {
-        executionResults.add(
-          '${task.id}: ${task.result.trim()}',
-        );
+        executionResults.add('${task.id}: ${task.result.trim()}');
       }
     }
 
@@ -175,8 +165,7 @@ class EtherFEKCoordinator {
     // MEASURE
     // ============================================================
 
-    final measurement =
-        business.autonomy.measure(completedPlan);
+    final measurement = business.autonomy.measure(completedPlan);
 
     // ============================================================
     // FEK-3
@@ -236,12 +225,10 @@ class EtherFEKCoordinator {
           return 'I could not process that request.';
         }
 
-        final completedPlan =
-            await action.execute(plan);
+        final completedPlan = await action.execute(plan);
 
         if (completedPlan.hasFailed) {
-          for (final task
-              in completedPlan.tasks.reversed) {
+          for (final task in completedPlan.tasks.reversed) {
             if (task.result.trim().isNotEmpty) {
               return task.result.trim();
             }
@@ -250,8 +237,7 @@ class EtherFEKCoordinator {
           return 'I could not complete that request.';
         }
 
-        for (final task
-            in completedPlan.tasks.reversed) {
+        for (final task in completedPlan.tasks.reversed) {
           if (task.result.trim().isNotEmpty) {
             return task.result.trim();
           }

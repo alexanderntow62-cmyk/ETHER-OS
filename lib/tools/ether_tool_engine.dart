@@ -33,9 +33,7 @@ class EtherToolEngine {
     return tool.execute(input);
   }
 
-  List<String> get toolNames =>
-      _tools.map((tool) => tool.name).toList();
+  List<String> get toolNames => _tools.map((tool) => tool.name).toList();
 
-  List<EtherTool> get tools =>
-      List.unmodifiable(_tools);
+  List<EtherTool> get tools => List.unmodifiable(_tools);
 }

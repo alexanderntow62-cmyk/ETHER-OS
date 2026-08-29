@@ -84,7 +84,8 @@ class EtherBusinessDecisionEngine {
       return const BusinessDecision(
         type: BusinessDecisionType.research,
         action: 'Research the market and identify opportunities.',
-        reason: 'Research provides information needed for an informed business decision.',
+        reason:
+            'Research provides information needed for an informed business decision.',
       );
     }
 
@@ -119,7 +120,8 @@ class EtherBusinessDecisionEngine {
       return const BusinessDecision(
         type: BusinessDecisionType.marketing,
         action: 'Prepare and execute an organic marketing strategy.',
-        reason: 'Marketing is required to attract customers and generate demand.',
+        reason:
+            'Marketing is required to attract customers and generate demand.',
       );
     }
 
@@ -133,7 +135,8 @@ class EtherBusinessDecisionEngine {
     ])) {
       return const BusinessDecision(
         type: BusinessDecisionType.customer,
-        action: 'Analyze customers and prepare the next customer-facing action.',
+        action:
+            'Analyze customers and prepare the next customer-facing action.',
         reason: 'Customer activity is necessary for business growth.',
       );
     }

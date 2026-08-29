@@ -30,22 +30,22 @@ void main() {
       );
 
       expect(result, contains('ETHER BUSINESS AUTONOMY LOOP'));
-      expect(result, contains('FEK-3 created the authoritative business plan.'));
-    },
-  );
-
-  test(
-    'FEK cooperative workflow preserves financial safety',
-    () async {
-      final fek = EtherFEKCoordinator();
-
-      final result = await fek.processAutonomousBusiness(
-        'pay for advertising for my business',
+      expect(
+        result,
+        contains('FEK-3 created the authoritative business plan.'),
       );
-
-      expect(result.toLowerCase(), contains('approval'));
     },
   );
+
+  test('FEK cooperative workflow preserves financial safety', () async {
+    final fek = EtherFEKCoordinator();
+
+    final result = await fek.processAutonomousBusiness(
+      'pay for advertising for my business',
+    );
+
+    expect(result.toLowerCase(), contains('approval'));
+  });
 
   test(
     'FEK autonomous business loop routes permitted execution through FEK-2',
