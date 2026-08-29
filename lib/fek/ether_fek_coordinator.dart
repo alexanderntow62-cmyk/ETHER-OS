@@ -1,3 +1,6 @@
+import '../business/business_state.dart';
+import '../business/business_planner.dart';
+import '../business/ether_business_autonomy_loop.dart';
 import '../agent/ether_plan.dart';
 import '../agent/ether_planner.dart';
 import '../ai/brain/ether_brain.dart';
@@ -5,22 +8,41 @@ import 'core/ether_core_fek.dart';
 import 'action/ether_action_fek.dart';
 import 'business/ether_business_fek.dart';
 
-enum EtherFEKType { core, action, business }
+enum EtherFEKType {
+  core,
+  action,
+  business,
+}
 
 /// Central coordinator for ETHER's three FEKs.
-///
-/// The coordinator creates one shared Brain and gives that Brain
-/// to the FEKs that need cognitive resources.
 ///
 /// FEK-1: Core Intelligence
 /// FEK-2: Action & Execution
 /// FEK-3: Business & Autonomous Operations
+///
+/// Architecture:
+///
+/// FEK-1 → FEK-3 OBSERVE → DECIDE → PLAN
+///                         ↓
+///                      FEK-2
+///                         ↓
+///                     EXECUTE
+///                         ↓
+///                      FEK-3
+///                         ↓
+///                  MEASURE → LEARN
+///
+/// Financial actions always stop at the approval boundary.
 class EtherFEKCoordinator {
   final EtherBrain brain;
   final EtherCoreFEK core;
   final EtherActionFEK action;
   final EtherBusinessFEK business;
   final EtherPlanner planner;
+  final EtherBusinessPlanner businessPlanner;
+
+  late final EtherBusinessAutonomyLoop businessLoop;
+  late final BusinessState businessState;
 
   factory EtherFEKCoordinator({
     EtherBrain? brain,
@@ -28,16 +50,37 @@ class EtherFEKCoordinator {
     EtherActionFEK? action,
     EtherBusinessFEK? business,
     EtherPlanner? planner,
+    EtherBusinessPlanner? businessPlanner,
+    EtherBusinessAutonomyLoop? businessLoop,
+    BusinessState? businessState,
   }) {
     final sharedBrain = brain ?? EtherBrain();
 
-    return EtherFEKCoordinator._(
+    final sharedAction =
+        action ?? EtherActionFEK(brain: sharedBrain);
+
+    final sharedBusiness =
+        business ?? EtherBusinessFEK();
+
+    final coordinator = EtherFEKCoordinator._(
       brain: sharedBrain,
       core: core ?? EtherCoreFEK(brain: sharedBrain),
-      action: action ?? EtherActionFEK(brain: sharedBrain),
-      business: business ?? EtherBusinessFEK(),
+      action: sharedAction,
+      business: sharedBusiness,
       planner: planner ?? EtherPlanner(),
+      businessPlanner: businessPlanner ?? EtherBusinessPlanner(),
     );
+
+    coordinator.businessState =
+        businessState ?? BusinessState();
+
+    coordinator.businessLoop =
+        businessLoop ??
+            EtherBusinessAutonomyLoop(
+              planner: coordinator.businessPlanner,
+            );
+
+    return coordinator;
   }
 
   EtherFEKCoordinator._({
@@ -46,74 +89,31 @@ class EtherFEKCoordinator {
     required this.action,
     required this.business,
     required this.planner,
+    required this.businessPlanner,
   });
 
   Future<void> initialize() async {
     await brain.initialize();
   }
 
-  /// Runs a business request through the FEK cooperation layer.
+  /// Standard autonomous business request.
   ///
-  /// Core/Business handles understanding and preparation.
-  /// Action handles permitted execution.
-  /// Financial actions remain blocked by the Business FEK.
+  /// FEK-3 owns the decision and creates the authoritative plan.
+  /// FEK-2 executes that exact plan.
   Future<String> processAutonomousBusiness(String input) async {
-    final request = input.trim();
-
-    if (request.isEmpty) {
-      return 'I could not process that request.';
-    }
-
-    if (route(request) != EtherFEKType.business) {
-      return process(request);
-    }
-
-    // FEK-3 prepares the business workflow first.
-    final businessResult = await business.start(request);
-
-    // Financial/approval boundaries stop the workflow here.
-    final lower = businessResult.toLowerCase();
-    if (lower.contains('approval required') ||
-        lower.contains('financial safety boundary') ||
-        lower.contains('stopped at financial boundary')) {
-      return businessResult;
-    }
-
-    // FEK-2 executes only the actions that can be performed autonomously.
-    final plan = planner.createPlan(request);
-
-    if (plan.tasks.isEmpty) {
-      return businessResult;
-    }
-
-    final completedPlan = await action.execute(plan);
-
-    final executionResults = <String>[];
-
-    for (final task in completedPlan.tasks) {
-      if (task.result.trim().isNotEmpty) {
-        executionResults.add(task.result.trim());
-      }
-    }
-
-    if (executionResults.isEmpty) {
-      return businessResult;
-    }
-
-    return [
-      businessResult,
-      '',
-      'FEK COOPERATIVE EXECUTION',
-      '',
-      executionResults.join('\\n\\n'),
-    ].join('\\n');
+    return runAutonomousBusinessLoop(input);
   }
 
-  /// Runs the full autonomous business execution loop.
+  /// Complete cooperative FEK business cycle.
   ///
-  /// FEK-3 plans the business.
-  /// FEK-2 executes permitted steps.
-  /// Financial steps pause for user approval.
+  /// FEK-3:
+  /// OBSERVE → DECIDE → PLAN
+  ///
+  /// FEK-2:
+  /// EXECUTE
+  ///
+  /// FEK-3:
+  /// MEASURE → LEARN
   Future<String> runAutonomousBusinessLoop(String input) async {
     final request = input.trim();
 
@@ -125,7 +125,114 @@ class EtherFEKCoordinator {
       return process(request);
     }
 
-    return business.runAutonomyText(goal: request);
+    // ============================================================
+    // FEK-3
+    // OBSERVE → DECIDE → PLAN
+    // ============================================================
+
+    final businessResult = await businessLoop.run(
+      goal: request,
+      state: businessState,
+    );
+
+    final lower = businessResult.output.toLowerCase();
+
+    // ============================================================
+    // FINANCIAL SAFETY BOUNDARY
+    // ============================================================
+
+    if (businessResult.stage ==
+            BusinessLoopStage.waitingApproval ||
+        lower.contains('approval required') ||
+        lower.contains('financial safety boundary') ||
+        lower.contains('stopped at financial boundary')) {
+      return businessResult.toString();
+    }
+
+    // ============================================================
+    // FEK-3 → FEK-2
+    // EXACT PLAN HANDOFF
+    // ============================================================
+
+    final plan = businessResult.plan;
+
+    if (plan == null || plan.tasks.isEmpty) {
+      return [
+        businessResult.toString(),
+        '',
+        'FEK-2 EXECUTION',
+        '',
+        'No executable tasks were produced.',
+      ].join('\n');
+    }
+
+    // ============================================================
+    // FEK-2
+    // EXECUTE
+    // ============================================================
+
+    final completedPlan = await action.execute(plan);
+
+    final executionResults = <String>[];
+
+    for (final task in completedPlan.tasks) {
+      if (task.result.trim().isNotEmpty) {
+        executionResults.add(
+          '${task.id}: ${task.result.trim()}',
+        );
+      }
+    }
+
+    // ============================================================
+    // FEK-3
+    // MEASURE
+    // ============================================================
+
+    final measurement =
+        businessLoop.measure(completedPlan);
+
+    // ============================================================
+    // FEK-3
+    // LEARN
+    // ============================================================
+
+    final decision = businessLoop.decisionEngine.decide(
+      goal: request,
+      state: businessState,
+    );
+
+    final learning = businessLoop.learn(
+      goal: request,
+      decision: decision,
+      measurement: measurement,
+      state: businessState,
+    );
+
+    // ============================================================
+    // FINAL RESULT
+    // ============================================================
+
+    return [
+      businessResult.toString(),
+      '',
+      'FEK-2 EXECUTION',
+      '',
+      executionResults.isEmpty
+          ? 'FEK-2 completed the permitted execution stage.'
+          : executionResults.join('\n\n'),
+      '',
+      'FEK-3 MEASURE',
+      measurement,
+      '',
+      'FEK-3 LEARN',
+      learning,
+      '',
+      'FEK COOPERATIVE HANDOFF',
+      'FEK-3 planned the workflow.',
+      'FEK-2 executed the permitted tasks.',
+      'FEK-3 measured the execution.',
+      'FEK-3 recorded the learning.',
+    ].join('\n');
   }
 
   Future<String> process(String input) async {
@@ -133,7 +240,7 @@ class EtherFEKCoordinator {
 
     switch (type) {
       case EtherFEKType.business:
-        return business.start(input);
+        return runAutonomousBusinessLoop(input);
 
       case EtherFEKType.action:
         final EtherPlan plan = planner.createPlan(input);
@@ -142,10 +249,12 @@ class EtherFEKCoordinator {
           return 'I could not process that request.';
         }
 
-        final completedPlan = await action.execute(plan);
+        final completedPlan =
+            await action.execute(plan);
 
         if (completedPlan.hasFailed) {
-          for (final task in completedPlan.tasks.reversed) {
+          for (final task
+              in completedPlan.tasks.reversed) {
             if (task.result.trim().isNotEmpty) {
               return task.result.trim();
             }
@@ -154,7 +263,8 @@ class EtherFEKCoordinator {
           return 'I could not complete that request.';
         }
 
-        for (final task in completedPlan.tasks.reversed) {
+        for (final task
+            in completedPlan.tasks.reversed) {
           if (task.result.trim().isNotEmpty) {
             return task.result.trim();
           }

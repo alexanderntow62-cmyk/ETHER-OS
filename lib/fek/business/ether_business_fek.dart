@@ -9,10 +9,15 @@ import '../action/ether_action_fek.dart';
 
 /// FEK-3: Business & Autonomous Operations.
 ///
-/// FEK-3 owns business-level observation, decision-making, planning,
-/// execution coordination, measurement, learning, and approval boundaries.
+/// FEK-3 owns:
+/// - observation
+/// - decision-making
+/// - business planning
+/// - measurement
+/// - learning
+/// - approval boundaries
 ///
-/// FEK-3 delegates executable actions to FEK-2.
+/// FEK-2 owns actual permitted execution.
 class EtherBusinessFEK {
   final EtherBusinessEngine business;
   final EtherBusinessOperator operator;
@@ -30,7 +35,7 @@ class EtherBusinessFEK {
         operator ?? EtherBusinessOperator(business: sharedBusiness);
 
     final sharedAutonomy =
-        autonomy ?? EtherBusinessAutonomyLoop(operator: sharedOperator);
+        autonomy ?? EtherBusinessAutonomyLoop();
 
     return EtherBusinessFEK._(
       business: sharedBusiness,
@@ -53,21 +58,29 @@ class EtherBusinessFEK {
     required String goal,
     BusinessState? state,
   }) async {
-    return autonomy.run(goal: goal, state: state ?? operator.state);
+    return autonomy.run(
+      goal: goal,
+      state: state ?? operator.state,
+    );
   }
 
   Future<String> runAutonomyText({
     required String goal,
     BusinessState? state,
   }) async {
-    final result = await runAutonomy(goal: goal, state: state);
+    final result = await runAutonomy(
+      goal: goal,
+      state: state,
+    );
 
     return result.toString();
   }
 
-  /// Connects FEK-3 business orchestration to FEK-2 execution.
+  /// FEK-3 decides what should happen.
   ///
-  /// Financial actions are blocked before FEK-2 receives the task.
+  /// FEK-2 performs only permitted execution.
+  ///
+  /// Financial actions are stopped before FEK-2 receives them.
   Future<String> executeWithActionFEK({
     required String goal,
     required EtherActionFEK actionFEK,
@@ -91,7 +104,17 @@ class EtherBusinessFEK {
       ].join('\n');
     }
 
-    final result = await actionFEK.execute(_createExecutionPlan(goal));
+    final plan = EtherPlan(
+      goal: goal,
+      tasks: [
+        EtherTask(
+          id: 'business_fek_action',
+          goal: goal,
+        ),
+      ],
+    );
+
+    final result = await actionFEK.execute(plan);
 
     final outputs = result.tasks
         .map((task) => task.result.trim())
@@ -111,9 +134,4 @@ class EtherBusinessFEK {
     ].join('\n');
   }
 
-  EtherPlan _createExecutionPlan(String goal) {
-    final task = EtherTask(id: 'business_fek_action', goal: goal);
-
-    return EtherPlan(goal: goal, tasks: [task]);
-  }
 }
