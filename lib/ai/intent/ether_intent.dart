@@ -11,10 +11,7 @@ class EtherIntent {
   final EtherIntentType type;
   final String input;
 
-  const EtherIntent({
-    required this.type,
-    required this.input,
-  });
+  const EtherIntent({required this.type, required this.input});
 
   bool get isConversation => type == EtherIntentType.conversation;
   bool get isSkill => type == EtherIntentType.skill;

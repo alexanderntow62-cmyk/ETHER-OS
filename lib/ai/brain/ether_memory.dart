@@ -13,10 +13,7 @@ class EtherMemory {
   }
 
   void _addMessage(String role, String content) {
-    _messages.add({
-      'role': role,
-      'content': content,
-    });
+    _messages.add({'role': role, 'content': content});
 
     // Keep only the most recent messages.
     while (_messages.length > maxMessages) {
@@ -24,8 +21,7 @@ class EtherMemory {
     }
   }
 
-  List<Map<String, String>> get messages =>
-      List.unmodifiable(_messages);
+  List<Map<String, String>> get messages => List.unmodifiable(_messages);
 
   // Get the most recent messages.
   List<Map<String, String>> recentMessages([int count = 10]) {
@@ -33,9 +29,7 @@ class EtherMemory {
       return const [];
     }
 
-    final start = _messages.length > count
-        ? _messages.length - count
-        : 0;
+    final start = _messages.length > count ? _messages.length - count : 0;
 
     return List.unmodifiable(_messages.sublist(start));
   }
@@ -48,13 +42,13 @@ class EtherMemory {
       return '';
     }
 
-    return recent.map((message) {
-      final role = message['role'] == 'user'
-          ? 'User'
-          : 'ETHER';
+    return recent
+        .map((message) {
+          final role = message['role'] == 'user' ? 'User' : 'ETHER';
 
-      return '$role: ${message['content']}';
-    }).join('\n');
+          return '$role: ${message['content']}';
+        })
+        .join('\n');
   }
 
   void clear() {

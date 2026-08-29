@@ -1,0 +1,41 @@
+import '../ai/brain/ether_brain.dart';
+import 'ether_plan.dart';
+import 'ether_task.dart';
+
+class EtherExecutor {
+  final EtherBrain brain;
+
+  EtherExecutor({EtherBrain? brain}) : brain = brain ?? EtherBrain();
+
+  Future<void> initialize() async {
+    await brain.initialize();
+  }
+
+  Future<EtherPlan> execute(EtherPlan plan) async {
+    for (final task in plan.tasks) {
+      if (task.status != EtherTaskStatus.pending) {
+        continue;
+      }
+
+      task.start();
+
+      try {
+        // Try a local ETHER skill first.
+        final skillResult = await brain.skills.tryHandle(task.goal);
+
+        if (skillResult != null) {
+          task.complete(skillResult);
+          continue;
+        }
+
+        // No local skill matched, so use ETHER's brain/AI.
+        final result = await brain.think(task.goal);
+        task.complete(result);
+      } catch (error) {
+        task.fail(error.toString());
+      }
+    }
+
+    return plan;
+  }
+}

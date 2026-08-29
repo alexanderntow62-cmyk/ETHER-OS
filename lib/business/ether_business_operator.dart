@@ -19,12 +19,11 @@ class EtherBusinessOperator {
     EtherLowCapitalBusinessStrategy? lowCapital,
     EtherBusinessDecisionEngine? decisionEngine,
     BusinessState? state,
-  })  : business = business ?? EtherBusinessEngine(),
-        research = research ?? EtherBusinessResearchEngine(),
-        lowCapital = lowCapital ?? EtherLowCapitalBusinessStrategy(),
-        decisionEngine =
-            decisionEngine ?? EtherBusinessDecisionEngine(),
-        state = state ?? BusinessState();
+  }) : business = business ?? EtherBusinessEngine(),
+       research = research ?? EtherBusinessResearchEngine(),
+       lowCapital = lowCapital ?? EtherLowCapitalBusinessStrategy(),
+       decisionEngine = decisionEngine ?? EtherBusinessDecisionEngine(),
+       state = state ?? BusinessState();
 
   Future<String> start(String goal) async {
     final input = goal.trim();
@@ -40,10 +39,7 @@ class EtherBusinessOperator {
       return runLowCapital(input);
     }
 
-    final decision = decisionEngine.decide(
-      goal: input,
-      state: state,
-    );
+    final decision = decisionEngine.decide(goal: input, state: state);
 
     switch (decision.type) {
       case BusinessDecisionType.finance:
@@ -66,10 +62,7 @@ class EtherBusinessOperator {
     }
   }
 
-  Future<String> _runResearch(
-    String goal,
-    BusinessDecision decision,
-  ) async {
+  Future<String> _runResearch(String goal, BusinessDecision decision) async {
     final report = research.createReport();
 
     state.addGoal(goal);
@@ -131,10 +124,7 @@ class EtherBusinessOperator {
     ].join('\n');
   }
 
-  Future<String> _runMarketing(
-    String goal,
-    BusinessDecision decision,
-  ) async {
+  Future<String> _runMarketing(String goal, BusinessDecision decision) async {
     state.addGoal(goal);
 
     return [
@@ -153,10 +143,7 @@ class EtherBusinessOperator {
     ].join('\n');
   }
 
-  Future<String> _runCustomer(
-    String goal,
-    BusinessDecision decision,
-  ) async {
+  Future<String> _runCustomer(String goal, BusinessDecision decision) async {
     state.addGoal(goal);
 
     return [
@@ -173,10 +160,7 @@ class EtherBusinessOperator {
     ].join('\n');
   }
 
-  Future<String> _runGeneral(
-    String goal,
-    BusinessDecision decision,
-  ) async {
+  Future<String> _runGeneral(String goal, BusinessDecision decision) async {
     state.addGoal(goal);
 
     final task = business.createTask(
@@ -195,10 +179,7 @@ class EtherBusinessOperator {
     ].join('\n');
   }
 
-  String _financialBoundary(
-    String goal,
-    BusinessDecision decision,
-  ) {
+  String _financialBoundary(String goal, BusinessDecision decision) {
     final task = business.createTask(
       id: 'financial_${business.tasks.length + 1}',
       goal: goal,
@@ -307,9 +288,7 @@ class EtherBusinessOperator {
     ].join('\n');
   }
 
-  BusinessTask createFinancialAction({
-    required String goal,
-  }) {
+  BusinessTask createFinancialAction({required String goal}) {
     return business.createTask(
       id: 'financial_${business.tasks.length + 1}',
       goal: goal,

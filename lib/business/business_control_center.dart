@@ -31,7 +31,6 @@ class BusinessControlCenter {
     required this.approvalQueue,
   });
 
-
   List<String> get businesses => List.unmodifiable(_businesses);
 
   List<String> get activity => List.unmodifiable(_activity);

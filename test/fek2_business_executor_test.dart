@@ -39,31 +39,34 @@ void main() {
 
       expect(result, isNotNull);
       expect(result, contains('PRODUCT'));
-      expect(result, contains('No purchase or financial commitment performed.'));
-    });
-
-    test('executes a permitted marketing task without paid advertising', () async {
-      final executor = EtherBusinessExecutor();
-
-      final task = EtherTask(
-        id: 'marketing_1',
-        goal: 'create a marketing campaign',
+      expect(
+        result,
+        contains('No purchase or financial commitment performed.'),
       );
-
-      final result = await executor.execute(task);
-
-      expect(result, isNotNull);
-      expect(result, contains('MARKETING'));
-      expect(result, contains('No paid advertising'));
     });
+
+    test(
+      'executes a permitted marketing task without paid advertising',
+      () async {
+        final executor = EtherBusinessExecutor();
+
+        final task = EtherTask(
+          id: 'marketing_1',
+          goal: 'create a marketing campaign',
+        );
+
+        final result = await executor.execute(task);
+
+        expect(result, isNotNull);
+        expect(result, contains('MARKETING'));
+        expect(result, contains('No paid advertising'));
+      },
+    );
 
     test('blocks financial execution', () async {
       final executor = EtherBusinessExecutor();
 
-      final task = EtherTask(
-        id: 'finance_1',
-        goal: 'pay for advertising',
-      );
+      final task = EtherTask(id: 'finance_1', goal: 'pay for advertising');
 
       final result = await executor.execute(task);
 
@@ -79,10 +82,7 @@ void main() {
       final plan = EtherPlan(
         goal: 'start a dropshipping business',
         tasks: [
-          EtherTask(
-            id: 'business_1',
-            goal: 'research the dropshipping market',
-          ),
+          EtherTask(id: 'business_1', goal: 'research the dropshipping market'),
         ],
       );
 
@@ -92,24 +92,22 @@ void main() {
       expect(result.tasks.first.result, contains('FEK-2 BUSINESS EXECUTOR'));
     });
 
-    test('FEK-2 marks financial tasks failed instead of executing them', () async {
-      final brain = EtherBrain();
-      final action = EtherActionFEK(brain: brain);
+    test(
+      'FEK-2 marks financial tasks failed instead of executing them',
+      () async {
+        final brain = EtherBrain();
+        final action = EtherActionFEK(brain: brain);
 
-      final plan = EtherPlan(
-        goal: 'pay for advertising',
-        tasks: [
-          EtherTask(
-            id: 'finance_1',
-            goal: 'pay for advertising',
-          ),
-        ],
-      );
+        final plan = EtherPlan(
+          goal: 'pay for advertising',
+          tasks: [EtherTask(id: 'finance_1', goal: 'pay for advertising')],
+        );
 
-      final result = await action.execute(plan);
+        final result = await action.execute(plan);
 
-      expect(result.tasks.first.status, EtherTaskStatus.failed);
-      expect(result.tasks.first.result, contains('FEK-2 BLOCKED'));
-    });
+        expect(result.tasks.first.status, EtherTaskStatus.failed);
+        expect(result.tasks.first.result, contains('FEK-2 BLOCKED'));
+      },
+    );
   });
 }

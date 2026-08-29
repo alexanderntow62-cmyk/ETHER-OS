@@ -6,10 +6,7 @@ class EtherPlanner {
     final input = goal.trim();
 
     if (input.isEmpty) {
-      return EtherPlan(
-        goal: input,
-        tasks: [],
-      );
+      return EtherPlan(goal: input, tasks: []);
     }
 
     final lower = input.toLowerCase();
@@ -33,11 +30,7 @@ class EtherPlanner {
       return EtherPlan(
         goal: input,
         tasks: [
-          EtherTask(
-            id: 'task_1',
-            goal: input,
-            type: EtherTaskType.finance,
-          ),
+          EtherTask(id: 'task_1', goal: input, type: EtherTaskType.finance),
         ],
       );
     }
@@ -64,17 +57,14 @@ class EtherPlanner {
         final cost = numbers[0];
         final sellingPrice = numbers[1];
         final profit = sellingPrice - cost;
-        final margin = sellingPrice == 0
-            ? 0
-            : (profit / sellingPrice) * 100;
+        final margin = sellingPrice == 0 ? 0 : (profit / sellingPrice) * 100;
 
         return EtherPlan(
           goal: input,
           tasks: [
             EtherTask(
               id: 'task_1',
-              goal:
-                  'Product cost is $cost and selling price is $sellingPrice.',
+              goal: 'Product cost is $cost and selling price is $sellingPrice.',
               type: EtherTaskType.calculator,
             ),
             EtherTask(
@@ -84,8 +74,7 @@ class EtherPlanner {
             ),
             EtherTask(
               id: 'task_3',
-              goal:
-                  'Calculate ($profit / $sellingPrice) times 100.',
+              goal: 'Calculate ($profit / $sellingPrice) times 100.',
               type: EtherTaskType.calculator,
             ),
             EtherTask(
@@ -101,11 +90,7 @@ class EtherPlanner {
       return EtherPlan(
         goal: input,
         tasks: [
-          EtherTask(
-            id: 'task_1',
-            goal: input,
-            type: EtherTaskType.calculator,
-          ),
+          EtherTask(id: 'task_1', goal: input, type: EtherTaskType.calculator),
         ],
       );
     }
@@ -124,11 +109,7 @@ class EtherPlanner {
       return EtherPlan(
         goal: input,
         tasks: [
-          EtherTask(
-            id: 'task_1',
-            goal: input,
-            type: EtherTaskType.research,
-          ),
+          EtherTask(id: 'task_1', goal: input, type: EtherTaskType.research),
         ],
       );
     }
@@ -150,11 +131,7 @@ class EtherPlanner {
       return EtherPlan(
         goal: input,
         tasks: [
-          EtherTask(
-            id: 'task_1',
-            goal: input,
-            type: EtherTaskType.product,
-          ),
+          EtherTask(id: 'task_1', goal: input, type: EtherTaskType.product),
         ],
       );
     }
@@ -175,11 +152,7 @@ class EtherPlanner {
       return EtherPlan(
         goal: input,
         tasks: [
-          EtherTask(
-            id: 'task_1',
-            goal: input,
-            type: EtherTaskType.marketing,
-          ),
+          EtherTask(id: 'task_1', goal: input, type: EtherTaskType.marketing),
         ],
       );
     }
@@ -199,11 +172,7 @@ class EtherPlanner {
       return EtherPlan(
         goal: input,
         tasks: [
-          EtherTask(
-            id: 'task_1',
-            goal: input,
-            type: EtherTaskType.customer,
-          ),
+          EtherTask(id: 'task_1', goal: input, type: EtherTaskType.customer),
         ],
       );
     }
@@ -214,19 +183,12 @@ class EtherPlanner {
     return EtherPlan(
       goal: input,
       tasks: [
-        EtherTask(
-          id: 'task_1',
-          goal: input,
-          type: EtherTaskType.general,
-        ),
+        EtherTask(id: 'task_1', goal: input, type: EtherTaskType.general),
       ],
     );
   }
 
-  bool _containsAny(
-    String input,
-    List<String> terms,
-  ) {
+  bool _containsAny(String input, List<String> terms) {
     return terms.any(input.contains);
   }
 }

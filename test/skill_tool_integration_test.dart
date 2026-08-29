@@ -19,9 +19,7 @@ void main() {
     final tools = EtherToolEngine();
     final engine = EtherSkillEngine(tools: tools);
 
-    final result = await engine.tryHandle(
-      'research autonomous AI',
-    );
+    final result = await engine.tryHandle('research autonomous AI');
 
     expect(result, contains('Research tool ready for:'));
     expect(result, contains('research autonomous AI'));

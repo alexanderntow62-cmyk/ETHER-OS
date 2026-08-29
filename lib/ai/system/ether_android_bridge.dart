@@ -6,9 +6,7 @@ class EtherAndroidBridge {
   Future<bool> openUrl(String url) async {
     final result = await _channel.invokeMethod<bool>(
       'openUrl',
-      <String, dynamic>{
-        'url': url,
-      },
+      <String, dynamic>{'url': url},
     );
 
     return result ?? false;

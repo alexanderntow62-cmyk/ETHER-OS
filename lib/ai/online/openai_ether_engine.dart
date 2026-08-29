@@ -8,16 +8,10 @@ class OpenAIEtherEngine implements EtherAIEngine {
   final String apiKey;
   final String model;
 
-  OpenAIEtherEngine({
-    required this.apiKey,
-    this.model = 'gpt-5-mini',
-  });
+  OpenAIEtherEngine({required this.apiKey, this.model = 'gpt-5-mini'});
 
   @override
-  Future<String> generate({
-    required String message,
-    String? context,
-  }) async {
+  Future<String> generate({required String message, String? context}) async {
     final uri = Uri.parse('https://api.openai.com/v1/responses');
 
     final response = await http.post(
@@ -33,19 +27,13 @@ class OpenAIEtherEngine implements EtherAIEngine {
             {
               'role': 'developer',
               'content': [
-                {
-                  'type': 'input_text',
-                  'text': context,
-                },
+                {'type': 'input_text', 'text': context},
               ],
             },
           {
             'role': 'user',
             'content': [
-              {
-                'type': 'input_text',
-                'text': message,
-              },
+              {'type': 'input_text', 'text': message},
             ],
           },
         ],

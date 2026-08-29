@@ -47,9 +47,8 @@ class EtherBusinessAutonomyLoop {
   EtherBusinessAutonomyLoop({
     EtherBusinessDecisionEngine? decisionEngine,
     EtherBusinessPlanner? planner,
-  })  : decisionEngine =
-            decisionEngine ?? EtherBusinessDecisionEngine(),
-        planner = planner ?? EtherBusinessPlanner();
+  }) : decisionEngine = decisionEngine ?? EtherBusinessDecisionEngine(),
+       planner = planner ?? EtherBusinessPlanner();
 
   Future<BusinessLoopResult> run({
     required String goal,
@@ -74,10 +73,7 @@ class EtherBusinessAutonomyLoop {
     // FEK-3: DECIDE
     // ============================================================
 
-    final decision = decisionEngine.decide(
-      goal: input,
-      state: state,
-    );
+    final decision = decisionEngine.decide(goal: input, state: state);
 
     // ============================================================
     // FINANCIAL SAFETY BOUNDARY
@@ -169,10 +165,7 @@ class EtherBusinessAutonomyLoop {
       );
     }
 
-    final plan = EtherPlan(
-      goal: input,
-      tasks: tasks,
-    );
+    final plan = EtherPlan(goal: input, tasks: tasks);
 
     state.addGoal(input);
     state.addPendingAction('Review results of business cycle: $input');
@@ -209,15 +202,9 @@ class EtherBusinessAutonomyLoop {
   }
 
   EtherTaskType _taskTypeForStep(BusinessPlanStep step) {
-    final text =
-        '${step.title} ${step.description}'.toLowerCase();
+    final text = '${step.title} ${step.description}'.toLowerCase();
 
-    if (_containsAny(text, [
-      'research',
-      'market',
-      'competitor',
-      'demand',
-    ])) {
+    if (_containsAny(text, ['research', 'market', 'competitor', 'demand'])) {
       return EtherTaskType.research;
     }
 
@@ -241,12 +228,7 @@ class EtherBusinessAutonomyLoop {
       return EtherTaskType.marketing;
     }
 
-    if (_containsAny(text, [
-      'customer',
-      'sales',
-      'support',
-      'client',
-    ])) {
+    if (_containsAny(text, ['customer', 'sales', 'support', 'client'])) {
       return EtherTaskType.customer;
     }
 
@@ -277,15 +259,11 @@ class EtherBusinessAutonomyLoop {
     }
 
     final failed = plan.tasks
-        .where(
-          (task) => task.status == EtherTaskStatus.failed,
-        )
+        .where((task) => task.status == EtherTaskStatus.failed)
         .length;
 
     final completed = plan.tasks
-        .where(
-          (task) => task.status == EtherTaskStatus.completed,
-        )
+        .where((task) => task.status == EtherTaskStatus.completed)
         .length;
 
     return [

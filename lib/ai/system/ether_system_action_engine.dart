@@ -3,9 +3,8 @@ import 'ether_android_bridge.dart';
 class EtherSystemActionEngine {
   final EtherAndroidBridge android;
 
-  EtherSystemActionEngine({
-    EtherAndroidBridge? android,
-  }) : android = android ?? EtherAndroidBridge();
+  EtherSystemActionEngine({EtherAndroidBridge? android})
+    : android = android ?? EtherAndroidBridge();
 
   Future<String> execute(String input) async {
     final text = input.trim();
@@ -28,8 +27,7 @@ class EtherSystemActionEngine {
     if (lower.startsWith('open ')) {
       final target = text.substring(5).trim();
 
-      if (target.startsWith('http://') ||
-          target.startsWith('https://')) {
+      if (target.startsWith('http://') || target.startsWith('https://')) {
         try {
           await android.openUrl(target);
           return 'Opening $target.';

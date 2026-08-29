@@ -1,0 +1,106 @@
+import '../core/ether_skill.dart';
+
+class CalculatorSkill implements EtherSkill {
+  @override
+  String get id => 'calculator';
+
+  @override
+  String get name => 'Calculator';
+
+  @override
+  bool canHandle(String input) {
+    final text = input.toLowerCase().trim();
+
+    // Direct expression: 25+17, 25 * 4, 10/2
+    if (RegExp(
+      r'^\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?[?]?$',
+    ).hasMatch(text)) {
+      return true;
+    }
+
+    // Natural language: what is 25+17?
+    if (RegExp(
+      r'\d+(?:\.\d+)?\s*[+\-*/]\s*\d+(?:\.\d+)?',
+    ).hasMatch(text)) {
+      return true;
+    }
+
+    return text.startsWith('calculate ') ||
+        text.startsWith('compute ') ||
+        text.contains(' plus ') ||
+        text.contains(' minus ') ||
+        text.contains(' times ') ||
+        text.contains(' multiplied by ') ||
+        text.contains(' divided by ');
+  }
+
+  @override
+  Future<String> execute(String input) async {
+    final original = input.trim();
+
+    var text = original.toLowerCase().trim();
+
+    // Remove question marks.
+    text = text.replaceAll('?', '');
+
+    // Remove natural-language prefixes.
+    text = text.replaceFirst(
+      RegExp(r"^(what is|what's|calculate|compute)\s+"),
+      '',
+    );
+
+    // Convert natural arithmetic to operators.
+    text = text
+        .replaceAll('multiplied by', '*')
+        .replaceAll('divided by', '/')
+        .replaceAll('plus', '+')
+        .replaceAll('minus', '-')
+        .replaceAll('times', '*');
+
+    text = text.replaceAll(' ', '');
+
+    final match = RegExp(
+      r'^(\d+(?:\.\d+)?)([+\-*/])(\d+(?:\.\d+)?)$',
+    ).firstMatch(text);
+
+    if (match == null) {
+      return 'I can calculate expressions such as "25 * 4" or "calculate 25 times 4".';
+    }
+
+    final a = double.parse(match.group(1)!);
+    final operator = match.group(2)!;
+    final b = double.parse(match.group(3)!);
+
+    double result;
+
+    switch (operator) {
+      case '+':
+        result = a + b;
+        break;
+
+      case '-':
+        result = a - b;
+        break;
+
+      case '*':
+        result = a * b;
+        break;
+
+      case '/':
+        if (b == 0) {
+          return 'Cannot divide by zero.';
+        }
+        result = a / b;
+        break;
+
+      default:
+        return 'Unknown operator.';
+    }
+
+    final formatted = result % 1 == 0
+        ? result.toInt().toString()
+        : result.toString();
+
+    return '$original = $formatted';
+  }
+}

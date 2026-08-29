@@ -5,9 +5,7 @@ class LocalEtherAI implements EtherAI {
   final EtherBrain _brain;
   bool _initialized = false;
 
-  LocalEtherAI({
-    EtherBrain? brain,
-  }) : _brain = brain ?? EtherBrain();
+  LocalEtherAI({EtherBrain? brain}) : _brain = brain ?? EtherBrain();
 
   @override
   Future<String> respond(String message) async {

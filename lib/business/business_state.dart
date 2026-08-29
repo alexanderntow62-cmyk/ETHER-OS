@@ -21,12 +21,12 @@ class BusinessState {
     List<String>? pendingActions,
     this.revenue = 0,
     this.expenses = 0,
-  })  : goals = goals ?? [],
-        products = products ?? [],
-        customers = customers ?? [],
-        suppliers = suppliers ?? [],
-        completedActions = completedActions ?? [],
-        pendingActions = pendingActions ?? [];
+  }) : goals = goals ?? [],
+       products = products ?? [],
+       customers = customers ?? [],
+       suppliers = suppliers ?? [],
+       completedActions = completedActions ?? [],
+       pendingActions = pendingActions ?? [];
 
   double get profit => revenue - expenses;
 

@@ -15,9 +15,7 @@ class EtherAgent {
 
   bool _initialized = false;
 
-  EtherAgent({
-    EtherFEKCoordinator? fek,
-  }) : fek = fek ?? EtherFEKCoordinator();
+  EtherAgent({EtherFEKCoordinator? fek}) : fek = fek ?? EtherFEKCoordinator();
 
   Future<void> initialize() async {
     if (_initialized) {

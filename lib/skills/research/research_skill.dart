@@ -5,8 +5,7 @@ import '../../tools/research_tool.dart';
 class ResearchSkill implements EtherSkill {
   final EtherToolEngine tools;
 
-  ResearchSkill({EtherToolEngine? tools})
-      : tools = tools ?? EtherToolEngine() {
+  ResearchSkill({EtherToolEngine? tools}) : tools = tools ?? EtherToolEngine() {
     this.tools.register(ResearchTool());
   }
 

@@ -10,8 +10,8 @@ class EtherSkillEngine {
   final List<EtherSkill> _skills;
 
   EtherSkillEngine({EtherToolEngine? tools})
-      : tools = tools ?? EtherToolEngine(),
-        _skills = [] {
+    : tools = tools ?? EtherToolEngine(),
+      _skills = [] {
     _skills.add(CalculatorSkill());
     _skills.add(SystemSkill());
     _skills.add(ResearchSkill(tools: this.tools));
@@ -37,11 +37,9 @@ class EtherSkillEngine {
     return skill.execute(input);
   }
 
-  List<String> get skillNames =>
-      _skills.map((skill) => skill.name).toList();
+  List<String> get skillNames => _skills.map((skill) => skill.name).toList();
 
-  List<EtherSkill> get skills =>
-      List.unmodifiable(_skills);
+  List<EtherSkill> get skills => List.unmodifiable(_skills);
 
   List<String> get toolNames => tools.toolNames;
 }
