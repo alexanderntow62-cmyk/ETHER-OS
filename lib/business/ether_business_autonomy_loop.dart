@@ -1,4 +1,3 @@
-import '../agent/ether_executor.dart';
 import '../agent/ether_plan.dart';
 import '../agent/ether_task.dart';
 import 'business_decision_engine.dart';
@@ -44,20 +43,13 @@ class BusinessLoopResult {
 class EtherBusinessAutonomyLoop {
   final EtherBusinessDecisionEngine decisionEngine;
   final EtherBusinessPlanner planner;
-  final EtherExecutor executor;
 
   EtherBusinessAutonomyLoop({
     EtherBusinessDecisionEngine? decisionEngine,
     EtherBusinessPlanner? planner,
-    EtherExecutor? executor,
   })  : decisionEngine =
             decisionEngine ?? EtherBusinessDecisionEngine(),
-        planner = planner ?? EtherBusinessPlanner(),
-        executor = executor ?? EtherExecutor();
-
-  Future<void> initialize() async {
-    await executor.initialize();
-  }
+        planner = planner ?? EtherBusinessPlanner();
 
   Future<BusinessLoopResult> run({
     required String goal,

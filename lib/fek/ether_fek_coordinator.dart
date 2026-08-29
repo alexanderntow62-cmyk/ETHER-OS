@@ -1,5 +1,4 @@
 import '../business/business_state.dart';
-import '../business/business_planner.dart';
 import '../business/ether_business_autonomy_loop.dart';
 import '../agent/ether_plan.dart';
 import '../agent/ether_planner.dart';
@@ -39,9 +38,7 @@ class EtherFEKCoordinator {
   final EtherActionFEK action;
   final EtherBusinessFEK business;
   final EtherPlanner planner;
-  final EtherBusinessPlanner businessPlanner;
 
-  late final EtherBusinessAutonomyLoop businessLoop;
   late final BusinessState businessState;
 
   factory EtherFEKCoordinator({
@@ -50,8 +47,6 @@ class EtherFEKCoordinator {
     EtherActionFEK? action,
     EtherBusinessFEK? business,
     EtherPlanner? planner,
-    EtherBusinessPlanner? businessPlanner,
-    EtherBusinessAutonomyLoop? businessLoop,
     BusinessState? businessState,
   }) {
     final sharedBrain = brain ?? EtherBrain();
@@ -68,17 +63,10 @@ class EtherFEKCoordinator {
       action: sharedAction,
       business: sharedBusiness,
       planner: planner ?? EtherPlanner(),
-      businessPlanner: businessPlanner ?? EtherBusinessPlanner(),
     );
 
     coordinator.businessState =
         businessState ?? BusinessState();
-
-    coordinator.businessLoop =
-        businessLoop ??
-            EtherBusinessAutonomyLoop(
-              planner: coordinator.businessPlanner,
-            );
 
     return coordinator;
   }
@@ -89,7 +77,6 @@ class EtherFEKCoordinator {
     required this.action,
     required this.business,
     required this.planner,
-    required this.businessPlanner,
   });
 
   Future<void> initialize() async {
@@ -130,7 +117,7 @@ class EtherFEKCoordinator {
     // OBSERVE → DECIDE → PLAN
     // ============================================================
 
-    final businessResult = await businessLoop.run(
+    final businessResult = await business.runAutonomy(
       goal: request,
       state: businessState,
     );
@@ -189,19 +176,19 @@ class EtherFEKCoordinator {
     // ============================================================
 
     final measurement =
-        businessLoop.measure(completedPlan);
+        business.autonomy.measure(completedPlan);
 
     // ============================================================
     // FEK-3
     // LEARN
     // ============================================================
 
-    final decision = businessLoop.decisionEngine.decide(
+    final decision = business.autonomy.decisionEngine.decide(
       goal: request,
       state: businessState,
     );
 
-    final learning = businessLoop.learn(
+    final learning = business.autonomy.learn(
       goal: request,
       decision: decision,
       measurement: measurement,
