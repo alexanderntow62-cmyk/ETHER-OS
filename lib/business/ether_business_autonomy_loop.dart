@@ -1,6 +1,10 @@
+import '../agent/ether_executor.dart';
+import '../agent/ether_plan.dart';
+import '../agent/ether_task.dart';
 import 'business_decision_engine.dart';
+import 'business_permission.dart';
+import 'business_planner.dart';
 import 'business_state.dart';
-import 'ether_business_operator.dart';
 
 enum BusinessLoopStage {
   observe,
@@ -17,10 +21,12 @@ enum BusinessLoopStage {
 class BusinessLoopResult {
   final BusinessLoopStage stage;
   final String output;
+  final EtherPlan? plan;
 
   const BusinessLoopResult({
     required this.stage,
     required this.output,
+    this.plan,
   });
 
   @override
@@ -36,15 +42,22 @@ class BusinessLoopResult {
 }
 
 class EtherBusinessAutonomyLoop {
-  final EtherBusinessOperator operator;
   final EtherBusinessDecisionEngine decisionEngine;
+  final EtherBusinessPlanner planner;
+  final EtherExecutor executor;
 
   EtherBusinessAutonomyLoop({
-    EtherBusinessOperator? operator,
     EtherBusinessDecisionEngine? decisionEngine,
-  })  : operator = operator ?? EtherBusinessOperator(),
-        decisionEngine =
-            decisionEngine ?? EtherBusinessDecisionEngine();
+    EtherBusinessPlanner? planner,
+    EtherExecutor? executor,
+  })  : decisionEngine =
+            decisionEngine ?? EtherBusinessDecisionEngine(),
+        planner = planner ?? EtherBusinessPlanner(),
+        executor = executor ?? EtherExecutor();
+
+  Future<void> initialize() async {
+    await executor.initialize();
+  }
 
   Future<BusinessLoopResult> run({
     required String goal,
@@ -59,16 +72,25 @@ class EtherBusinessAutonomyLoop {
       );
     }
 
-    // OBSERVE
-    final observation = _observe(input, state);
+    // ============================================================
+    // FEK-3: OBSERVE
+    // ============================================================
 
-    // DECIDE
+    final observation = observe(input, state);
+
+    // ============================================================
+    // FEK-3: DECIDE
+    // ============================================================
+
     final decision = decisionEngine.decide(
       goal: input,
       state: state,
     );
 
-    // FINANCIAL ACTIONS STOP HERE.
+    // ============================================================
+    // FINANCIAL SAFETY BOUNDARY
+    // ============================================================
+
     if (decision.requiresApproval) {
       return BusinessLoopResult(
         stage: BusinessLoopStage.waitingApproval,
@@ -76,32 +98,105 @@ class EtherBusinessAutonomyLoop {
           'OBSERVE',
           observation,
           '',
-          'DECISION',
-          decision.action,
+          'DECIDE',
+          'Type: ${decision.type.name}',
+          'Action: ${decision.action}',
+          '',
+          'STOPPED AT FINANCIAL BOUNDARY',
           '',
           'APPROVAL REQUIRED',
           decision.reason,
           '',
           'ETHER will not perform the financial action automatically.',
+          '',
+          'No purchases, payments, subscriptions, or financial commitments were made.',
         ].join('\n'),
       );
     }
 
-    // PLAN + EXECUTE
-    final execution = await operator.start(input);
+    // ============================================================
+    // FEK-3: PLAN
+    // ============================================================
 
-    // MEASURE
-    final measurement = _measure(execution);
+    final businessPlan = planner.createPlan(input);
 
-    // LEARN
-    final learning = _learn(
-      input,
-      decision,
-      measurement,
+    if (businessPlan.steps.isEmpty) {
+      return BusinessLoopResult(
+        stage: BusinessLoopStage.failed,
+        output: [
+          'OBSERVE',
+          observation,
+          '',
+          'DECIDE',
+          'Type: ${decision.type.name}',
+          'Action: ${decision.action}',
+          '',
+          'PLAN',
+          'FEK-3 could not produce a business plan.',
+        ].join('\n'),
+      );
+    }
+
+    // ============================================================
+    // FEK-3 → FEK-2
+    // ============================================================
+
+    final tasks = <EtherTask>[];
+
+    for (final step in businessPlan.steps) {
+      if (step.permission == BusinessPermission.financial) {
+        continue;
+      }
+
+      tasks.add(
+        EtherTask(
+          id: step.id,
+          goal: '${step.title}: ${step.description}',
+          type: _taskTypeForStep(step),
+        ),
+      );
+    }
+
+    if (tasks.isEmpty) {
+      return BusinessLoopResult(
+        stage: BusinessLoopStage.waitingApproval,
+        output: [
+          'OBSERVE',
+          observation,
+          '',
+          'DECIDE',
+          'Type: ${decision.type.name}',
+          'Action: ${decision.action}',
+          '',
+          'PLAN',
+          'Business plan contains only restricted financial actions.',
+          '',
+          'STOPPED AT FINANCIAL BOUNDARY',
+          'User approval is required before financial actions can proceed.',
+        ].join('\n'),
+      );
+    }
+
+    final plan = EtherPlan(
+      goal: input,
+      tasks: tasks,
     );
 
+    state.addGoal(input);
+    state.addPendingAction('Review results of business cycle: $input');
+
+    // ============================================================
+    // FEK-3 → FEK-2 PLAN HANDOFF BOUNDARY
+    // ============================================================
+    // FEK-3 owns OBSERVE → DECIDE → PLAN.
+    // FEK-3 does NOT execute the plan.
+    //
+    // The coordinator hands this exact plan to FEK-2.
+    // FEK-3 must return the plan at this boundary.
+
     return BusinessLoopResult(
-      stage: BusinessLoopStage.completed,
+      stage: BusinessLoopStage.plan,
+      plan: plan,
       output: [
         'OBSERVE',
         observation,
@@ -110,50 +205,121 @@ class EtherBusinessAutonomyLoop {
         'Type: ${decision.type.name}',
         'Action: ${decision.action}',
         '',
-        'PLAN + EXECUTE',
-        execution,
-        '',
-        'MEASURE',
-        measurement,
-        '',
-        'LEARN',
-        learning,
+        'PLAN',
+        'FEK-3 created the authoritative business plan.',
+        'Business plan steps: ${businessPlan.steps.length}',
+        'Executable FEK-2 tasks: ${tasks.length}',
+        'FEK-3 does not execute business tasks.',
+        'FEK-3 → FEK-2',
+        'FEK-2 receives the exact executable plan.',
       ].join('\n'),
     );
   }
 
-  String _observe(String goal, BusinessState state) {
-    final pending = state.pendingActions.length;
+  EtherTaskType _taskTypeForStep(BusinessPlanStep step) {
+    final text =
+        '${step.title} ${step.description}'.toLowerCase();
 
+    if (_containsAny(text, [
+      'research',
+      'market',
+      'competitor',
+      'demand',
+    ])) {
+      return EtherTaskType.research;
+    }
+
+    if (_containsAny(text, [
+      'product',
+      'supplier',
+      'inventory',
+      'pricing',
+      'margin',
+    ])) {
+      return EtherTaskType.product;
+    }
+
+    if (_containsAny(text, [
+      'marketing',
+      'promotion',
+      'audience',
+      'advertising',
+      'content',
+    ])) {
+      return EtherTaskType.marketing;
+    }
+
+    if (_containsAny(text, [
+      'customer',
+      'sales',
+      'support',
+      'client',
+    ])) {
+      return EtherTaskType.customer;
+    }
+
+    return EtherTaskType.general;
+  }
+
+  bool _containsAny(String input, List<String> terms) {
+    return terms.any(input.contains);
+  }
+
+  String observe(String goal, BusinessState state) {
     return [
       'Goal: $goal',
-      'Pending actions: $pending',
+      'Pending actions: ${state.pendingActions.length}',
+      'Products: ${state.products.length}',
+      'Customers: ${state.customers.length}',
+      'Suppliers: ${state.suppliers.length}',
+      'Revenue: ${state.revenue}',
+      'Expenses: ${state.expenses}',
+      'Profit: ${state.profit}',
       'Business state observed.',
     ].join('\n');
   }
 
-  String _measure(String execution) {
-    if (execution.trim().isEmpty) {
-      return 'No measurable execution result was produced.';
+  String measure(EtherPlan plan) {
+    if (plan.tasks.isEmpty) {
+      return 'No tasks were executed.';
     }
 
-    if (execution.contains('APPROVAL REQUIRED')) {
-      return 'Execution stopped at the approval boundary.';
-    }
+    final failed = plan.tasks
+        .where(
+          (task) => task.status == EtherTaskStatus.failed,
+        )
+        .length;
 
-    return 'Business action completed and produced an execution result.';
+    final completed = plan.tasks
+        .where(
+          (task) => task.status == EtherTaskStatus.completed,
+        )
+        .length;
+
+    return [
+      'Tasks: ${plan.tasks.length}',
+      'Completed: $completed',
+      'Failed: $failed',
+      'Plan complete: ${plan.isComplete}',
+    ].join('\n');
   }
 
-  String _learn(
-    String goal,
-    BusinessDecision decision,
-    String measurement,
-  ) {
+  String learn({
+    required String goal,
+    required BusinessDecision decision,
+    required String measurement,
+    required BusinessState state,
+  }) {
+    final reviewAction = 'Review results of business cycle: $goal';
+
+    state.addPendingAction(reviewAction);
+
     return [
-      'Recorded business cycle:',
+      'Business cycle learned.',
       'Goal: $goal',
       'Decision: ${decision.type.name}',
       'Measurement: $measurement',
+      'Pending action created: $reviewAction',
     ].join('\n');
   }
 }
