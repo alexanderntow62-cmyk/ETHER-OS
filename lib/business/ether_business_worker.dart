@@ -43,15 +43,15 @@ class EtherBusinessWorker {
 
     if (input.isEmpty) {
       return [
-        'ETHER BUSINESS WORKER',
+        'ETHER AUTONOMOUS WORKER',
         'STATUS: NO GOAL',
-        'No business goal provided.',
+        'No task provided',
       ].join('\n');
     }
 
     if (!isWithinWorkWindow()) {
       return [
-        'ETHER BUSINESS WORKER',
+        'ETHER AUTONOMOUS WORKER',
         'STATUS: OUTSIDE WORK WINDOW',
         'Work window: 06:30–17:30',
         'No autonomous work performed.',
@@ -64,13 +64,13 @@ class EtherBusinessWorker {
       final result = await operator.start(input);
 
       return [
-        'ETHER BUSINESS WORKER',
+        'ETHER AUTONOMOUS WORKER',
         'STATUS: COMPLETED',
         '',
         result,
       ].join('\n');
     } catch (error) {
-      return ['ETHER BUSINESS WORKER', 'STATUS: ERROR', '$error'].join('\n');
+      return ['ETHER AUTONOMOUS WORKER', 'STATUS: ERROR', '$error'].join('\n');
     } finally {
       _running = false;
     }
