@@ -19,7 +19,7 @@ class BusinessIntelligenceInsight {
 
   String get summary {
     return [
-      '$product',
+      product,
       'Opportunity: $opportunityScore/100',
       'Classification: $classification',
       'Recommendation: $recommendation',

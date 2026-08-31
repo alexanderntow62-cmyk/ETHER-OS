@@ -110,7 +110,7 @@ class CalculatorSkill implements EtherSkill {
     final marginFormatted = margin.toStringAsFixed(2);
 
     return [
-      '$original',
+      original,
       'Cost: ${_formatNumber(cost)}',
       'Selling price: ${_formatNumber(sellingPrice)}',
       'Profit: $profitFormatted',
