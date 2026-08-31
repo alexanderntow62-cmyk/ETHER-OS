@@ -64,6 +64,4 @@ class EtherBusinessFEK {
 
     return result.toString();
   }
-
-
 }

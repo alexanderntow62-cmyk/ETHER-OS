@@ -57,6 +57,8 @@ class EtherBusinessOperator {
       case BusinessDecisionType.customer:
         return _runCustomer(input, decision);
 
+      case BusinessDecisionType.calculator:
+        return _calculatorBoundary(input, decision);
       case BusinessDecisionType.general:
         return _runGeneral(input, decision);
     }
@@ -157,6 +159,33 @@ class EtherBusinessOperator {
       'Sales/support action prepared',
       '',
       'No financial transaction was performed.',
+    ].join('\n');
+  }
+
+  /// Calculator requests are informational only.
+  ///
+  /// The actual calculation is intentionally NOT performed here.
+  /// FEK-3/business logic must not duplicate FEK-2's CalculatorSkill.
+  /// The coordinator/autonomy layer can hand the original request
+  /// to FEK-2, where the CalculatorSkill performs the calculation.
+  Future<String> _calculatorBoundary(
+    String goal,
+    BusinessDecision decision,
+  ) async {
+    state.addGoal(goal);
+
+    return [
+      'ETHER BUSINESS OPERATOR',
+      '',
+      decision.toString(),
+      '',
+      'CALCULATOR REQUEST',
+      'This is an informational calculation.',
+      'No financial transaction or business commitment is authorized.',
+      'FEK-2 CalculatorSkill is responsible for performing the calculation.',
+      '',
+      'CALCULATOR HANDOFF',
+      goal,
     ].join('\n');
   }
 

@@ -15,6 +15,12 @@ class CalculatorSkill implements EtherSkill {
   bool canHandle(String input) {
     final text = input.toLowerCase().trim();
 
+    // Business calculations.
+    if (_isBusinessCalculation(text)) {
+      return true;
+    }
+
+    // Normal mathematical expressions.
     if (RegExp(r'[\d\)]\s*[+\-*/]\s*[\d\(]').hasMatch(text)) {
       return true;
     }
@@ -31,8 +37,15 @@ class CalculatorSkill implements EtherSkill {
   @override
   Future<String> execute(String input) async {
     final original = input.trim();
+    final lower = original.toLowerCase().trim();
 
-    var text = original.toLowerCase().trim();
+    // Handle business calculations before the generic expression parser.
+    final businessResult = _calculateBusinessResult(original, lower);
+    if (businessResult != null) {
+      return businessResult;
+    }
+
+    var text = lower;
 
     text = text.replaceAll('?', '');
 
@@ -61,6 +74,68 @@ class CalculatorSkill implements EtherSkill {
     } catch (_) {
       return 'I could not calculate "$original".';
     }
+  }
+
+  static bool _isBusinessCalculation(String text) {
+    return text.contains('profit') ||
+        text.contains('margin') ||
+        (text.contains('cost') && text.contains('selling price')) ||
+        (text.contains('selling price') && text.contains('cost price'));
+  }
+
+  static String? _calculateBusinessResult(String original, String text) {
+    if (!_isBusinessCalculation(text)) {
+      return null;
+    }
+
+    final cost = _extractNumberAfterAny(text, ['cost price', 'cost']);
+
+    final sellingPrice = _extractNumberAfterAny(text, [
+      'selling price',
+      'sale price',
+      'selling',
+    ]);
+
+    if (cost == null || sellingPrice == null) {
+      return 'I could not calculate "$original".';
+    }
+
+    final profit = sellingPrice - cost;
+    final margin = sellingPrice == 0 ? 0 : (profit / sellingPrice) * 100;
+
+    final profitFormatted = profit % 1 == 0
+        ? profit.toInt().toString()
+        : profit.toString();
+
+    final marginFormatted = margin.toStringAsFixed(2);
+
+    return [
+      '$original',
+      'Cost: ${_formatNumber(cost)}',
+      'Selling price: ${_formatNumber(sellingPrice)}',
+      'Profit: $profitFormatted',
+      'Margin: $marginFormatted%',
+    ].join('\n');
+  }
+
+  static double? _extractNumberAfterAny(String text, List<String> labels) {
+    for (final label in labels) {
+      final escaped = RegExp.escape(label);
+
+      final match = RegExp(
+        '$escaped\\s*[:=]?\\s*(-?\\d+(?:\\.\\d+)?)',
+      ).firstMatch(text);
+
+      if (match != null) {
+        return double.tryParse(match.group(1)!);
+      }
+    }
+
+    return null;
+  }
+
+  static String _formatNumber(double value) {
+    return value % 1 == 0 ? value.toInt().toString() : value.toString();
   }
 
   double _evaluate(String expression) {
@@ -143,7 +218,7 @@ class _ExpressionParser {
       final result = _parseExpression();
 
       if (_position >= expression.length || expression[_position] != ')') {
-        throw FormatException('Missing closing parenthesis');
+        throw FormatException('Expected closing parenthesis');
       }
 
       _position++;
@@ -151,10 +226,18 @@ class _ExpressionParser {
       return result;
     }
 
+    var sign = 1.0;
+
+    if (expression[_position] == '-') {
+      sign = -1.0;
+      _position++;
+    }
+
     final start = _position;
 
     while (_position < expression.length &&
-        RegExp(r'[0-9.]').hasMatch(expression[_position])) {
+        (RegExp(r'\d').hasMatch(expression[_position]) ||
+            expression[_position] == '.')) {
       _position++;
     }
 
@@ -162,6 +245,12 @@ class _ExpressionParser {
       throw FormatException('Expected number');
     }
 
-    return double.parse(expression.substring(start, _position));
+    final number = double.tryParse(expression.substring(start, _position));
+
+    if (number == null) {
+      throw FormatException('Invalid number');
+    }
+
+    return sign * number;
   }
 }
