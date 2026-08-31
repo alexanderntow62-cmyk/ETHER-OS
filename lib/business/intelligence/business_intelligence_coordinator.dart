@@ -18,9 +18,8 @@ class EtherBusinessIntelligenceCoordinator {
   EtherBusinessIntelligenceCoordinator({
     EtherBusinessResearchEngine? research,
     EtherBusinessIntelligenceEngine? intelligence,
-  })  : research = research ?? EtherBusinessResearchEngine(),
-        intelligence =
-            intelligence ?? const EtherBusinessIntelligenceEngine();
+  }) : research = research ?? EtherBusinessResearchEngine(),
+       intelligence = intelligence ?? const EtherBusinessIntelligenceEngine();
 
   EtherBusinessIntelligenceReport analyze({
     required String goal,
@@ -30,10 +29,7 @@ class EtherBusinessIntelligenceCoordinator {
     return intelligence.analyze(products);
   }
 
-  String createAnalysis({
-    required String goal,
-    BusinessState? state,
-  }) {
+  String createAnalysis({required String goal, BusinessState? state}) {
     final report = analyze(goal: goal, state: state);
 
     return [

@@ -54,15 +54,9 @@ class EtherBusinessIntelligenceReport {
     if (bestOpportunity != null) {
       lines.add('TOP OPPORTUNITY');
       lines.add(bestOpportunity!.product);
-      lines.add(
-        'Opportunity Score: ${bestOpportunity!.opportunityScore}/100',
-      );
-      lines.add(
-        'Classification: ${bestOpportunity!.classification}',
-      );
-      lines.add(
-        'Recommendation: ${bestOpportunity!.recommendation}',
-      );
+      lines.add('Opportunity Score: ${bestOpportunity!.opportunityScore}/100');
+      lines.add('Classification: ${bestOpportunity!.classification}');
+      lines.add('Recommendation: ${bestOpportunity!.recommendation}');
     } else {
       lines.add('TOP OPPORTUNITY');
       lines.add('No suitable opportunity identified.');
@@ -78,12 +72,8 @@ class EtherBusinessIntelligenceEngine {
   EtherBusinessIntelligenceReport analyze(
     List<BusinessResearchResult> products,
   ) {
-    final insights = products
-        .map(_analyzeProduct)
-        .toList()
-      ..sort(
-        (a, b) => b.opportunityScore.compareTo(a.opportunityScore),
-      );
+    final insights = products.map(_analyzeProduct).toList()
+      ..sort((a, b) => b.opportunityScore.compareTo(a.opportunityScore));
 
     return EtherBusinessIntelligenceReport(
       insights: insights,
@@ -97,9 +87,7 @@ class EtherBusinessIntelligenceEngine {
     return analyze(research.researchProducts());
   }
 
-  BusinessIntelligenceInsight _analyzeProduct(
-    BusinessResearchResult product,
-  ) {
+  BusinessIntelligenceInsight _analyzeProduct(BusinessResearchResult product) {
     final strengths = <String>[];
     final risks = <String>[];
 
@@ -128,12 +116,10 @@ class EtherBusinessIntelligenceEngine {
     final classification = _classification(product.opportunityScore);
 
     final recommendation = switch (classification) {
-      'HIGH OPPORTUNITY' =>
-        'Prioritize research and prepare a business plan.',
+      'HIGH OPPORTUNITY' => 'Prioritize research and prepare a business plan.',
       'MODERATE OPPORTUNITY' =>
         'Continue validation before committing resources.',
-      _ =>
-        'Do not prioritize until stronger evidence is available.',
+      _ => 'Do not prioritize until stronger evidence is available.',
     };
 
     return BusinessIntelligenceInsight(

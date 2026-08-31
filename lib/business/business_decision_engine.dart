@@ -3,6 +3,7 @@ import 'business_state.dart';
 enum BusinessDecisionType {
   calculator,
   research,
+  content,
   product,
   marketing,
   customer,
@@ -130,7 +131,36 @@ class EtherBusinessDecisionEngine {
       );
     }
 
-    // 4. MARKETING.
+    // 4. CONTENT BUSINESS.
+    //
+    // Content gets its own route so YouTube/TikTok/faceless
+    // content businesses are handled by the dedicated
+    // ContentBusinessEngine rather than the generic marketing
+    // workflow.
+    if (_containsAny(input, [
+      'faceless',
+      'youtube channel',
+      'youtube',
+      'tiktok',
+      'short form content',
+      'short-form content',
+      'long form content',
+      'long-form content',
+      'content business',
+      'content creation',
+      'create videos',
+      'make videos',
+      'video content',
+    ])) {
+      return const BusinessDecision(
+        type: BusinessDecisionType.content,
+        action: 'Plan and prepare the content business workflow.',
+        reason:
+            'Content production, repurposing, analytics, and publishing preparation are handled by the dedicated content business layer.',
+      );
+    }
+
+    // 5. MARKETING.
     if (_containsAny(input, [
       'marketing',
       'promotion',

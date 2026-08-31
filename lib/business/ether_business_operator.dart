@@ -3,6 +3,8 @@ import 'business_permission.dart';
 import 'business_research_engine.dart';
 import 'business_state.dart';
 import 'business_task.dart';
+import 'content/content_business_engine.dart';
+import 'content/content_objective.dart';
 import 'ether_business_engine.dart';
 import 'low_capital_business_strategy.dart';
 
@@ -11,6 +13,7 @@ class EtherBusinessOperator {
   final EtherBusinessResearchEngine research;
   final EtherLowCapitalBusinessStrategy lowCapital;
   final EtherBusinessDecisionEngine decisionEngine;
+  final ContentBusinessEngine contentBusiness;
   final BusinessState state;
 
   EtherBusinessOperator({
@@ -18,11 +21,13 @@ class EtherBusinessOperator {
     EtherBusinessResearchEngine? research,
     EtherLowCapitalBusinessStrategy? lowCapital,
     EtherBusinessDecisionEngine? decisionEngine,
+    ContentBusinessEngine? contentBusiness,
     BusinessState? state,
   }) : business = business ?? EtherBusinessEngine(),
        research = research ?? EtherBusinessResearchEngine(),
        lowCapital = lowCapital ?? EtherLowCapitalBusinessStrategy(),
        decisionEngine = decisionEngine ?? EtherBusinessDecisionEngine(),
+       contentBusiness = contentBusiness ?? ContentBusinessEngine(),
        state = state ?? BusinessState();
 
   Future<String> start(String goal) async {
@@ -47,6 +52,9 @@ class EtherBusinessOperator {
 
       case BusinessDecisionType.research:
         return _runResearch(input, decision);
+
+      case BusinessDecisionType.content:
+        return _runContent(input, decision);
 
       case BusinessDecisionType.product:
         return _runProductWorkflow(input, decision);
@@ -82,6 +90,46 @@ class EtherBusinessOperator {
       '',
       report,
     ].join('\n');
+  }
+
+  Future<String> _runContent(String goal, BusinessDecision decision) async {
+    state.addGoal(goal);
+
+    final objective = ContentObjective(goal: goal);
+
+    final result = contentBusiness.executePreparation(objective);
+
+    state.addPendingAction('Review prepared content publishing');
+
+    return [
+      'ETHER BUSINESS OPERATOR',
+      '',
+      decision.toString(),
+      '',
+      'CONTENT BUSINESS WORKFLOW',
+      'Content business objective analyzed',
+      'Content strategy prepared',
+      'Content opportunities researched',
+      'Scripts prepared',
+      'Short-form repurposing prepared',
+      'Publishing package prepared',
+      '',
+      'NICHE:',
+      result.strategy.niche,
+      '',
+      'CONTENT IDEAS: ${result.opportunities.length}',
+      'SCRIPTS PREPARED: ${result.generatedScripts.length}',
+      'SHORT-FORM VERSIONS: ${result.repurposedShorts.length}',
+      '',
+      'NEXT STAGE: ${result.nextStage.name}',
+      '',
+      'PUBLISHING BOUNDARY',
+      'Publishing requires an authorized platform integration.',
+      'Final publishing remains approval-gated.',
+      '',
+      'FINANCIAL SAFETY',
+      'Purchases, subscriptions, paid advertising, and other financial commitments require your approval.',
+    ].join('\\n');
   }
 
   Future<String> _runProductWorkflow(

@@ -78,10 +78,7 @@ class EtherBusinessAutonomyLoop {
     // ============================================================
     // Intelligence analyzes available research evidence.
     // It is advisory only and cannot authorize financial actions.
-    intelligence.createAnalysis(
-      goal: input,
-      state: state,
-    );
+    intelligence.createAnalysis(goal: input, state: state);
 
     // ============================================================
     // FEK-3: DECIDE
