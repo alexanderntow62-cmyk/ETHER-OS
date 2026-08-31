@@ -15,7 +15,7 @@ void main() {
   test('Research skill uses the research tool', () async {
     final result = await skill.execute('research autonomous AI');
 
-    expect(result, contains('Research tool ready for:'));
+    expect(result, contains('RESEARCH PROVIDER: LOCAL'));
 
     expect(result, contains('research autonomous AI'));
   });

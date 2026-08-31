@@ -1,11 +1,18 @@
 import 'ether_tool.dart';
+import 'research/research_provider.dart';
+import 'research/local_research_provider.dart';
 
 /// ETHER's research tool.
 ///
 /// This is the external-information interface used by ResearchSkill.
-/// The tool itself does not make business decisions; it only gathers
-/// information for the intelligence layer.
+/// The tool delegates information gathering to a ResearchProvider.
+/// The tool itself does not make business decisions.
 class ResearchTool implements EtherTool {
+  final ResearchProvider provider;
+
+  ResearchTool({ResearchProvider? provider})
+      : provider = provider ?? LocalResearchProvider();
+
   @override
   String get name => 'research';
 
@@ -21,6 +28,8 @@ class ResearchTool implements EtherTool {
       return 'Research query is empty.';
     }
 
-    return 'Research tool ready for: $query';
+    // Preserve the existing user-facing query behavior while routing
+    // research through the provider abstraction.
+    return provider.research(query);
   }
 }
