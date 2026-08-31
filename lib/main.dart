@@ -47,6 +47,58 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
   bool _isListening = false;
   bool _isThinking = false;
 
+  final String _voiceState = 'READY';
+
+  Color get _stateColor {
+    switch (_voiceState) {
+      case 'LISTENING':
+        return const Color(0xFF00E5FF);
+      case 'PROCESSING':
+        return const Color(0xFF7C4DFF);
+      case 'SPEAKING':
+        return const Color(0xFF00FF9D);
+      case 'ERROR':
+      case 'UNAVAILABLE':
+        return Colors.redAccent;
+      default:
+        return const Color(0xFF00E5FF);
+    }
+  }
+
+  IconData get _stateIcon {
+    switch (_voiceState) {
+      case 'LISTENING':
+        return Icons.mic_rounded;
+      case 'PROCESSING':
+        return Icons.psychology_rounded;
+      case 'SPEAKING':
+        return Icons.volume_up_rounded;
+      case 'ERROR':
+        return Icons.error_outline_rounded;
+      case 'UNAVAILABLE':
+        return Icons.cloud_off_rounded;
+      default:
+        return Icons.auto_awesome_rounded;
+    }
+  }
+
+  String get _stateDescription {
+    switch (_voiceState) {
+      case 'LISTENING':
+        return 'Listening for your command';
+      case 'PROCESSING':
+        return 'Analyzing and executing';
+      case 'SPEAKING':
+        return 'Delivering response';
+      case 'ERROR':
+        return 'Execution encountered an error';
+      case 'UNAVAILABLE':
+        return 'Voice service unavailable';
+      default:
+        return 'Awaiting your command';
+    }
+  }
+
   int _selectedIndex = 0;
 
   final List<Map<String, String>> _messages = [
@@ -177,133 +229,331 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
 
   Widget _corePage() {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
       children: [
+        _coreHeader(),
+        const SizedBox(height: 18),
         _orbSection(),
-        const SizedBox(height: 22),
+        const SizedBox(height: 18),
         _commandCard(),
-        const SizedBox(height: 18),
+        const SizedBox(height: 14),
         _statusGrid(),
-        const SizedBox(height: 18),
-        _sectionLabel('AUTONOMOUS SYSTEM'),
-        const SizedBox(height: 10),
-        _statusCard(
-          Icons.psychology_outlined,
-          'INTELLIGENCE',
-          'ETHER reasoning core ready',
-          true,
+      ],
+    );
+  }
+
+  Widget _coreHeader() {
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFF00E5FF).withValues(alpha: .35),
+            ),
+            color: const Color(0xFF00E5FF).withValues(alpha: .05),
+          ),
+          child: const Icon(
+            Icons.auto_awesome,
+            color: Color(0xFF00E5FF),
+            size: 22,
+          ),
         ),
-        _statusCard(
-          Icons.account_tree_outlined,
-          'THREE-FEK',
-          'Core / Action / Business',
-          true,
+        const SizedBox(width: 12),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ETHER-OS',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 2,
+                ),
+              ),
+              SizedBox(height: 3),
+              Text(
+                'AUTONOMOUS INTELLIGENCE SYSTEM',
+                style: TextStyle(
+                  fontSize: 8,
+                  color: Colors.white38,
+                  letterSpacing: 1.4,
+                ),
+              ),
+            ],
+          ),
         ),
-        _statusCard(
-          Icons.memory_outlined,
-          'MEMORY',
-          'Persistent context subsystem',
-          true,
+        _statePill(),
+      ],
+    );
+  }
+
+  Widget _statePill() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: _stateColor.withValues(alpha: .35)),
+        color: _stateColor.withValues(alpha: .07),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _stateColor,
+            ),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            _voiceState,
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+              color: _stateColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _orbSection() {
+    return Container(
+      height: 285,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: _stateColor.withValues(alpha: .16)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFF08111A), const Color(0xFF03050A)],
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _orbController,
+            builder: (context, child) {
+              final pulse = 0.82 + (_orbController.value * 0.18);
+
+              return Transform.scale(
+                scale: _isListening || _isThinking ? pulse : 0.9,
+                child: child,
+              );
+            },
+            child: Container(
+              width: 170,
+              height: 170,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: _stateColor.withValues(alpha: .22),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _stateColor.withValues(alpha: .10),
+                    blurRadius: 45,
+                    spreadRadius: 12,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Container(
+                  width: 116,
+                  height: 116,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _stateColor.withValues(alpha: .5),
+                      width: 2,
+                    ),
+                    color: _stateColor.withValues(alpha: .035),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _stateColor.withValues(alpha: .18),
+                        blurRadius: 30,
+                        spreadRadius: 3,
+                      ),
+                    ],
+                  ),
+                  child: Icon(_stateIcon, size: 42, color: _stateColor),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 18,
+            left: 20,
+            child: _orbLabel(Icons.memory_outlined, 'INTELLIGENCE', 'ONLINE'),
+          ),
+          Positioned(
+            top: 18,
+            right: 20,
+            child: _orbLabel(Icons.shield_outlined, 'SAFETY', 'ACTIVE'),
+          ),
+          Positioned(
+            bottom: 18,
+            child: Column(
+              children: [
+                Text(
+                  _voiceState,
+                  style: TextStyle(
+                    color: _stateColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 2,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  _stateDescription,
+                  style: const TextStyle(color: Colors.white38, fontSize: 9),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _orbLabel(IconData icon, String title, String value) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 13, color: Colors.white38),
+        const SizedBox(width: 5),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 7,
+                color: Colors.white30,
+                letterSpacing: 1,
+              ),
+            ),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 8,
+                color: Colors.white70,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _orbSection() {
-    return SizedBox(
-      height: 250,
-      child: Center(
-        child: AnimatedBuilder(
-          animation: _orbController,
-          builder: (context, child) {
-            return Transform.rotate(
-              angle: _orbController.value * 6.28318,
-              child: child,
-            );
-          },
-          child: Container(
-            width: 190,
-            height: 190,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const RadialGradient(
-                colors: [
-                  Color(0xFF172A38),
-                  Color(0xFF071019),
-                  Color(0xFF03050A),
-                ],
-              ),
-              border: Border.all(
-                color: const Color(0xFF00E5FF).withValues(alpha: .5),
-                width: 2,
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x4400E5FF),
-                  blurRadius: 50,
-                  spreadRadius: 8,
-                ),
-              ],
-            ),
-            child: const Center(
-              child: Icon(
-                Icons.hub_rounded,
-                size: 70,
+  Widget _commandCard() {
+    return Container(
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: const Color(0xFF080D14),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: .07)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.terminal_rounded,
+                size: 17,
                 color: Color(0xFF00E5FF),
               ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'COMMAND CENTER',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.3,
+                  ),
+                ),
+              ),
+              Text(
+                _isThinking ? 'PROCESSING' : 'READY',
+                style: TextStyle(
+                  fontSize: 8,
+                  color: _isThinking ? const Color(0xFF7C4DFF) : Colors.white38,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _messages.isEmpty
+                ? 'Awaiting your command.'
+                : _messages.last['text'] ?? '',
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white60,
+              height: 1.45,
+              fontSize: 13,
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _commandCard() {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = 1;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: const Color(0xFF00E5FF).withValues(alpha: .25),
-          ),
-          color: const Color(0xFF091018),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.mic_none_rounded, color: Color(0xFF00E5FF), size: 28),
-            SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'COMMAND ETHER',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.3,
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _isThinking ? null : _toggleVoice,
+                  icon: Icon(
+                    _isListening ? Icons.stop_rounded : Icons.mic_none_rounded,
+                    size: 17,
+                  ),
+                  label: Text(_isListening ? 'STOP' : 'VOICE'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _stateColor,
+                    side: BorderSide(color: _stateColor.withValues(alpha: .35)),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Tap to open the intelligence interface',
-                    style: TextStyle(fontSize: 11, color: Colors.white54),
-                  ),
-                ],
+                ),
               ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: Colors.white38,
-            ),
-          ],
-        ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: _isThinking ? null : _send,
+                  icon: const Icon(Icons.arrow_upward_rounded, size: 17),
+                  label: const Text('COMMAND'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: const Color(0xFF00E5FF),
+                    disabledForegroundColor: Colors.black38,
+                    disabledBackgroundColor: const Color(
+                      0xFF00E5FF,
+                    ).withValues(alpha: .18),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -311,39 +561,64 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
   Widget _statusGrid() {
     return Row(
       children: [
-        Expanded(child: _metric('CORE', 'ONLINE', Icons.memory)),
-        const SizedBox(width: 8),
-        Expanded(child: _metric('FEK', '3 ACTIVE', Icons.account_tree)),
-        const SizedBox(width: 8),
-        Expanded(child: _metric('VOICE', 'READY', Icons.graphic_eq)),
+        Expanded(
+          child: _metric(
+            'JARVIS',
+            _jarvis.isInitialized ? 'ONLINE' : 'READY',
+            Icons.psychology_outlined,
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(
+          child: _metric(
+            'VOICE',
+            _isListening ? 'ACTIVE' : 'READY',
+            Icons.graphic_eq_rounded,
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(child: _metric('FEK', 'ACTIVE', Icons.account_tree_outlined)),
       ],
     );
   }
 
   Widget _metric(String title, String value, IconData icon) {
     return Container(
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A0E16),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: .07)),
+        color: const Color(0xFF080D16),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: const Color(0xFF00E5FF).withValues(alpha: 0.16),
+        ),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Icon(icon, size: 20, color: const Color(0xFF00E5FF)),
-          const SizedBox(height: 7),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 8,
-              color: Colors.white38,
-              letterSpacing: 1,
+          Icon(icon, color: _stateColor, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white54,
+                    fontSize: 10,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
           ),
         ],
       ),
