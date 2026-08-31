@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/skills/research/research_skill.dart';
+import 'package:ether_os/skills/research/research_skill.dart';
 
 void main() {
   late ResearchSkill skill;

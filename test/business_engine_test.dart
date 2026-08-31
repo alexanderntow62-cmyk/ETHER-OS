@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/ether_business_engine.dart';
-import '../lib/business/business_task.dart';
+import 'package:ether_os/business/ether_business_engine.dart';
+import 'package:ether_os/business/business_task.dart';
 
 void main() {
   test(

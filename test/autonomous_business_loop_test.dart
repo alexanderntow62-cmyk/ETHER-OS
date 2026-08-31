@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../lib/fek/ether_fek_coordinator.dart';
+import 'package:ether_os/fek/ether_fek_coordinator.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

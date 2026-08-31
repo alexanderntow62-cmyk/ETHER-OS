@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/tools/research/local_research_provider.dart';
-import '../lib/tools/research/research_provider.dart';
+import 'package:ether_os/tools/research/local_research_provider.dart';
+import 'package:ether_os/tools/research/research_provider.dart';
 
 void main() {
   test('local research provider has correct identity', () {

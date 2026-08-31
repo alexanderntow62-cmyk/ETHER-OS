@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/ether_business_operator.dart';
+import 'package:ether_os/business/ether_business_operator.dart';
 
 void main() {
   test(

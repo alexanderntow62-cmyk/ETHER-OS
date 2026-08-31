@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/skills/system/system_skill.dart';
+import 'package:ether_os/skills/system/system_skill.dart';
 
 void main() {
   late SystemSkill skill;

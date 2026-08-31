@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/business_state.dart';
-import '../lib/business/ether_business_autonomy_loop.dart';
+import 'package:ether_os/business/business_state.dart';
+import 'package:ether_os/business/ether_business_autonomy_loop.dart';
 
 void main() {
   test(

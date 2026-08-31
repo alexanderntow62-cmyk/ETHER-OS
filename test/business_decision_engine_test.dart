@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/business/business_state.dart';
-import '../lib/business/business_decision_engine.dart';
+import 'package:ether_os/business/business_state.dart';
+import 'package:ether_os/business/business_decision_engine.dart';
 
 void main() {
   test('Business state calculates profit', () {

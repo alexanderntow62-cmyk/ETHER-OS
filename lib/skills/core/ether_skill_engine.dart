@@ -2,6 +2,7 @@ import '../../tools/ether_tool_engine.dart';
 import '../calculator/calculator_skill.dart';
 import '../research/research_skill.dart';
 import '../system/system_skill.dart';
+import '../generation/generation_skill.dart';
 import 'ether_skill.dart';
 
 class EtherSkillEngine {
@@ -15,6 +16,7 @@ class EtherSkillEngine {
     _skills.add(CalculatorSkill());
     _skills.add(SystemSkill());
     _skills.add(ResearchSkill(tools: this.tools));
+    _skills.add(GenerationSkill());
   }
 
   EtherSkill? findSkill(String input) {

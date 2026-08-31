@@ -1,0 +1,104 @@
+import 'ether_android_bridge.dart';
+
+class EtherSystemActionEngine {
+  final EtherAndroidBridge android;
+
+  EtherSystemActionEngine({EtherAndroidBridge? android})
+      : android = android ?? EtherAndroidBridge();
+
+  Future<String> execute(String input) async {
+    final text = input.trim();
+
+    if (text.isEmpty) {
+      return 'I need a system command.';
+    }
+
+    final lower = text.toLowerCase();
+
+    // Known website shortcut.
+    if (lower.contains('booking.com')) {
+      try {
+        final opened =
+            await android.openUrl('https://www.booking.com/');
+
+        if (!opened) {
+          return 'I could not open Booking.com.';
+        }
+
+        return 'Opening Booking.com.';
+      } catch (e) {
+        return 'I could not open Booking.com: $e';
+      }
+    }
+
+    // Explicit URL opening.
+    if (lower.startsWith('open ')) {
+      final target = text.substring(5).trim();
+
+      if (target.startsWith('http://') ||
+          target.startsWith('https://')) {
+        try {
+          final opened = await android.openUrl(target);
+
+          if (!opened) {
+            return 'I could not open $target.';
+          }
+
+          return 'Opening $target.';
+        } catch (e) {
+          return 'I could not open $target: $e';
+        }
+      }
+
+      if (lower == 'open settings') {
+        return _openSettings();
+      }
+
+      return 'I understood that you want to open $target, but I need a URL or supported system target.';
+    }
+
+    // Android settings.
+    if (lower == 'settings' ||
+        lower == 'open settings' ||
+        lower == 'start settings') {
+      return _openSettings();
+    }
+
+    // Explicit application launch.
+    if (lower.startsWith('launch ')) {
+      final target = text.substring(7).trim();
+
+      if (target.isEmpty) {
+        return 'I need an app package name to launch.';
+      }
+
+      try {
+        final launched = await android.launchApp(target);
+
+        if (!launched) {
+          return 'I could not launch $target. The app may not be installed or launchable.';
+        }
+
+        return 'Launched $target.';
+      } catch (e) {
+        return 'I could not launch $target: $e';
+      }
+    }
+
+    return 'I understood this as a system action, but I do not have an executor for it yet.';
+  }
+
+  Future<String> _openSettings() async {
+    try {
+      final opened = await android.openSettings();
+
+      if (!opened) {
+        return 'I could not open Android Settings.';
+      }
+
+      return 'Opening Android Settings.';
+    } catch (e) {
+      return 'I could not open Android Settings: $e';
+    }
+  }
+}

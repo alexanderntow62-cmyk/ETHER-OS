@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/low_capital_business_strategy.dart';
+import 'package:ether_os/business/low_capital_business_strategy.dart';
 
 void main() {
   test('ETHER identifies a zero-capital opportunity', () {

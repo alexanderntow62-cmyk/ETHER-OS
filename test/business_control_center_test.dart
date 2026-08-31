@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/business_control_center.dart';
+import 'package:ether_os/business/business_control_center.dart';
 
 void main() {
   test('ETHER Control Center manages businesses', () {

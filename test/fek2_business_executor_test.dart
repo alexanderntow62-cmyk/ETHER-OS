@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../lib/agent/ether_plan.dart';
-import '../lib/agent/ether_task.dart';
-import '../lib/ai/brain/ether_brain.dart';
-import '../lib/fek/action/business/ether_business_executor.dart';
-import '../lib/fek/action/ether_action_fek.dart';
+import 'package:ether_os/agent/ether_plan.dart';
+import 'package:ether_os/agent/ether_task.dart';
+import 'package:ether_os/ai/brain/ether_brain.dart';
+import 'package:ether_os/fek/action/business/ether_business_executor.dart';
+import 'package:ether_os/fek/action/ether_action_fek.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
