@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'jarvis/ether_jarvis_controller.dart';
-import 'ai/ether_voice.dart';
+import 'jarvis/ether_jarvis_voice.dart';
 
 void main() {
   runApp(const EtherOS());
@@ -37,7 +37,7 @@ class EtherJarvisHome extends StatefulWidget {
 class _EtherJarvisHomeState extends State<EtherJarvisHome>
     with SingleTickerProviderStateMixin {
   final EtherJarvisController _jarvis = EtherJarvisController();
-  final EtherVoice _voice = EtherVoice();
+  late final EtherJarvisVoice _jarvisVoice;
 
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -52,21 +52,17 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
   final List<Map<String, String>> _messages = [
     {
       'role': 'ether',
-      'text':
-          'ETHER intelligence core online.\\n\\nAwaiting your command.'
+      'text': 'ETHER intelligence core online.\\n\\nAwaiting your command.',
     },
   ];
 
-  final List<String> _sections = [
-    'CORE',
-    'AI',
-    'BUSINESS',
-    'SYSTEM',
-  ];
+  final List<String> _sections = ['CORE', 'AI', 'BUSINESS', 'SYSTEM'];
 
   @override
   void initState() {
     super.initState();
+
+    _jarvisVoice = EtherJarvisVoice(jarvis: _jarvis);
 
     _orbController = AnimationController(
       vsync: this,
@@ -107,20 +103,12 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
             height: 42,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: const Color(0xFF00E5FF),
-              ),
+              border: Border.all(color: const Color(0xFF00E5FF)),
               boxShadow: const [
-                BoxShadow(
-                  color: Color(0x3300E5FF),
-                  blurRadius: 18,
-                ),
+                BoxShadow(color: Color(0x3300E5FF), blurRadius: 18),
               ],
             ),
-            child: const Icon(
-              Icons.hub_rounded,
-              color: Color(0xFF00E5FF),
-            ),
+            child: const Icon(Icons.hub_rounded, color: Color(0xFF00E5FF)),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -147,10 +135,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-              vertical: 6,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
@@ -159,11 +144,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
             ),
             child: const Row(
               children: [
-                Icon(
-                  Icons.circle,
-                  size: 7,
-                  color: Color(0xFF00E5FF),
-                ),
+                Icon(Icons.circle, size: 7, color: Color(0xFF00E5FF)),
                 SizedBox(width: 6),
                 Text(
                   'ONLINE',
@@ -295,11 +276,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
         ),
         child: const Row(
           children: [
-            Icon(
-              Icons.mic_none_rounded,
-              color: Color(0xFF00E5FF),
-              size: 28,
-            ),
+            Icon(Icons.mic_none_rounded, color: Color(0xFF00E5FF), size: 28),
             SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -315,10 +292,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
                   SizedBox(height: 4),
                   Text(
                     'Tap to open the intelligence interface',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white54,
-                    ),
+                    style: TextStyle(fontSize: 11, color: Colors.white54),
                   ),
                 ],
               ),
@@ -337,54 +311,26 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
   Widget _statusGrid() {
     return Row(
       children: [
-        Expanded(
-          child: _metric(
-            'CORE',
-            'ONLINE',
-            Icons.memory,
-          ),
-        ),
+        Expanded(child: _metric('CORE', 'ONLINE', Icons.memory)),
         const SizedBox(width: 8),
-        Expanded(
-          child: _metric(
-            'FEK',
-            '3 ACTIVE',
-            Icons.account_tree,
-          ),
-        ),
+        Expanded(child: _metric('FEK', '3 ACTIVE', Icons.account_tree)),
         const SizedBox(width: 8),
-        Expanded(
-          child: _metric(
-            'VOICE',
-            'READY',
-            Icons.graphic_eq,
-          ),
-        ),
+        Expanded(child: _metric('VOICE', 'READY', Icons.graphic_eq)),
       ],
     );
   }
 
-  Widget _metric(
-    String title,
-    String value,
-    IconData icon,
-  ) {
+  Widget _metric(String title, String value, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: const Color(0xFF0A0E16),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: .07),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: .07)),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: const Color(0xFF00E5FF),
-          ),
+          Icon(icon, size: 20, color: const Color(0xFF00E5FF)),
           const SizedBox(height: 7),
           Text(
             title,
@@ -397,10 +343,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
           const SizedBox(height: 3),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -426,10 +369,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
 
               final message = _messages[index];
 
-              return _bubble(
-                message['role'] ?? 'ether',
-                message['text'] ?? '',
-              );
+              return _bubble(message['role'] ?? 'ether', message['text'] ?? '');
             },
           ),
         ),
@@ -438,16 +378,11 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
     );
   }
 
-  Widget _bubble(
-    String role,
-    String text, {
-    bool thinking = false,
-  }) {
+  Widget _bubble(String role, String text, {bool thinking = false}) {
     final user = role == 'user';
 
     return Align(
-      alignment:
-          user ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: user ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         constraints: const BoxConstraints(maxWidth: 350),
         margin: const EdgeInsets.only(bottom: 12),
@@ -471,9 +406,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
             Text(
               user ? 'YOU' : 'ETHER',
               style: TextStyle(
-                color: user
-                    ? const Color(0xFF00E5FF)
-                    : const Color(0xFF7C4DFF),
+                color: user ? const Color(0xFF00E5FF) : const Color(0xFF7C4DFF),
                 fontSize: 8,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.4,
@@ -483,12 +416,9 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
             Text(
               text,
               style: TextStyle(
-                color: thinking
-                    ? Colors.white30
-                    : Colors.white70,
+                color: thinking ? Colors.white30 : Colors.white70,
                 height: 1.45,
-                fontStyle:
-                    thinking ? FontStyle.italic : FontStyle.normal,
+                fontStyle: thinking ? FontStyle.italic : FontStyle.normal,
               ),
             ),
             if (!user && !thinking) ...[
@@ -496,10 +426,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
               IconButton(
                 tooltip: 'Speak',
                 padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(
-                  minWidth: 30,
-                  minHeight: 30,
-                ),
+                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
                 icon: const Icon(
                   Icons.volume_up_rounded,
                   size: 17,
@@ -520,9 +447,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
       decoration: BoxDecoration(
         color: const Color(0xFF03050A),
         border: Border(
-          top: BorderSide(
-            color: Colors.white.withValues(alpha: .07),
-          ),
+          top: BorderSide(color: Colors.white.withValues(alpha: .07)),
         ),
       ),
       child: SafeArea(
@@ -558,13 +483,9 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
               tooltip: 'Voice',
               onPressed: _isThinking ? null : _toggleVoice,
               icon: Icon(
-                _isListening
-                    ? Icons.mic_rounded
-                    : Icons.mic_none_rounded,
+                _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
               ),
-              color: _isListening
-                  ? Colors.redAccent
-                  : const Color(0xFF00E5FF),
+              color: _isListening ? Colors.redAccent : const Color(0xFF00E5FF),
             ),
             IconButton(
               tooltip: 'Send',
@@ -609,18 +530,9 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
         const SizedBox(height: 18),
         _sectionLabel('CONTROL CENTER'),
         const SizedBox(height: 10),
-        _largeAction(
-          Icons.play_arrow_rounded,
-          'RUN BUSINESS CHECK',
-        ),
-        _largeAction(
-          Icons.pending_actions_rounded,
-          'APPROVAL QUEUE',
-        ),
-        _largeAction(
-          Icons.analytics_outlined,
-          'BUSINESS STATE',
-        ),
+        _largeAction(Icons.play_arrow_rounded, 'RUN BUSINESS CHECK'),
+        _largeAction(Icons.pending_actions_rounded, 'APPROVAL QUEUE'),
+        _largeAction(Icons.analytics_outlined, 'BUSINESS STATE'),
       ],
     );
   }
@@ -675,11 +587,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
     );
   }
 
-  Widget _pageTitle(
-    IconData icon,
-    String title,
-    String subtitle,
-  ) {
+  Widget _pageTitle(IconData icon, String title, String subtitle) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -690,11 +598,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 40,
-            color: const Color(0xFF00E5FF),
-          ),
+          Icon(icon, size: 40, color: const Color(0xFF00E5FF)),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
@@ -711,10 +615,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
                 const SizedBox(height: 5),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.white54,
-                  ),
+                  style: const TextStyle(fontSize: 11, color: Colors.white54),
                 ),
               ],
             ),
@@ -736,18 +637,11 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
       decoration: BoxDecoration(
         color: const Color(0xFF090D15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: .07),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: .07)),
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: active
-                ? const Color(0xFF00E5FF)
-                : Colors.white30,
-          ),
+          Icon(icon, color: active ? const Color(0xFF00E5FF) : Colors.white30),
           const SizedBox(width: 13),
           Expanded(
             child: Column(
@@ -774,19 +668,14 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
           Icon(
             active ? Icons.check_circle : Icons.circle_outlined,
             size: 17,
-            color: active
-                ? const Color(0xFF00E5FF)
-                : Colors.white24,
+            color: active ? const Color(0xFF00E5FF) : Colors.white24,
           ),
         ],
       ),
     );
   }
 
-  Widget _largeAction(
-    IconData icon,
-    String title,
-  ) {
+  Widget _largeAction(IconData icon, String title) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(17),
@@ -799,10 +688,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            color: const Color(0xFF00E5FF),
-          ),
+          Icon(icon, color: const Color(0xFF00E5FF)),
           const SizedBox(width: 14),
           Text(
             title,
@@ -812,10 +698,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
             ),
           ),
           const Spacer(),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: Colors.white30,
-          ),
+          const Icon(Icons.chevron_right_rounded, color: Colors.white30),
         ],
       ),
     );
@@ -836,74 +719,63 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
   Widget _navigation() {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 5, 10, 10),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 4,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 7),
       decoration: BoxDecoration(
         color: const Color(0xFF090D15),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: .08),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: .08)),
       ),
       child: Row(
-        children: List.generate(
-          _sections.length,
-          (index) {
-            final selected = _selectedIndex == index;
+        children: List.generate(_sections.length, (index) {
+          final selected = _selectedIndex == index;
 
-            return Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedIndex = index;
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 9,
-                  ),
-                  decoration: BoxDecoration(
-                    color: selected
-                        ? const Color(0xFF00E5FF)
-                            .withValues(alpha: .08)
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        [
-                          Icons.hub_outlined,
-                          Icons.auto_awesome,
-                          Icons.business_center_outlined,
-                          Icons.settings_outlined,
-                        ][index],
-                        size: 19,
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFF00E5FF).withValues(alpha: .08)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      [
+                        Icons.hub_outlined,
+                        Icons.auto_awesome,
+                        Icons.business_center_outlined,
+                        Icons.settings_outlined,
+                      ][index],
+                      size: 19,
+                      color: selected
+                          ? const Color(0xFF00E5FF)
+                          : Colors.white38,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      _sections[index],
+                      style: TextStyle(
+                        fontSize: 7,
+                        letterSpacing: .8,
                         color: selected
                             ? const Color(0xFF00E5FF)
                             : Colors.white38,
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        _sections[index],
-                        style: TextStyle(
-                          fontSize: 7,
-                          letterSpacing: .8,
-                          color: selected
-                              ? const Color(0xFF00E5FF)
-                              : Colors.white38,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -918,10 +790,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
     _controller.clear();
 
     setState(() {
-      _messages.add({
-        'role': 'user',
-        'text': message,
-      });
+      _messages.add({'role': 'user', 'text': message});
       _isThinking = true;
     });
 
@@ -930,110 +799,146 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
     try {
       final response = await _jarvis.execute(message);
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
-        _messages.add({
-          'role': 'ether',
-          'text': response,
-        });
+        _messages.add({'role': 'ether', 'text': response});
         _isThinking = false;
       });
 
       await _scrollBottom();
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
 
       setState(() {
         _messages.add({
           'role': 'ether',
-          'text':
-              'ETHER encountered an error while processing the command.',
+          'text': 'ETHER encountered an error while processing the command.',
         });
         _isThinking = false;
       });
+
+      await _scrollBottom();
     }
   }
 
   Future<void> _toggleVoice() async {
     if (_isListening) {
-      await _voice.stopListening();
+      await _jarvisVoice.stop();
 
       if (!mounted) return;
 
       setState(() {
         _isListening = false;
+        _isThinking = false;
       });
 
       return;
     }
 
-    final ready = await _voice.initialize(
-      onStatus: (status) {
-        if (!mounted) return;
-
-        if (status == 'notListening' || status == 'done') {
-          setState(() {
-            _isListening = false;
-          });
-        }
-      },
-      onError: (error) {
-        if (!mounted) return;
-
-        setState(() {
-          _isListening = false;
-        });
-      },
-    );
-
-    if (!ready) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Microphone is not available.'),
-        ),
-      );
-
+    if (_isThinking) {
       return;
     }
+
+    if (!mounted) return;
 
     setState(() {
       _isListening = true;
     });
 
-    await _voice.startListening(
-      onResult: (text, finalResult) {
-        if (!mounted) return;
+    try {
+      await _jarvisVoice.listenOnce(
+        onUserText: (text) {
+          if (!mounted) return;
 
-        setState(() {
-          _controller.text = text;
-          _controller.selection =
-              TextSelection.fromPosition(
-            TextPosition(
-              offset: _controller.text.length,
-            ),
-          );
-        });
-
-        if (finalResult) {
           setState(() {
-            _isListening = false;
+            _controller.text = text;
+            _controller.selection = TextSelection.fromPosition(
+              TextPosition(offset: _controller.text.length),
+            );
           });
-        }
-      },
-    );
+        },
+        onEtherResponse: (response) {
+          if (!mounted) return;
+
+          setState(() {
+            final existingUserMessage = _controller.text.trim();
+
+            if (existingUserMessage.isNotEmpty) {
+              _messages.add({'role': 'user', 'text': existingUserMessage});
+            }
+
+            _controller.clear();
+
+            _messages.add({'role': 'ether', 'text': response});
+
+            _isThinking = false;
+          });
+
+          _scrollBottom();
+        },
+        onStatus: (status) {
+          if (!mounted) return;
+
+          setState(() {
+            switch (status) {
+              case 'LISTENING':
+                _isListening = true;
+                _isThinking = false;
+                break;
+
+              case 'PROCESSING':
+                _isListening = false;
+                _isThinking = true;
+                break;
+
+              case 'SPEAKING':
+                _isListening = false;
+                _isThinking = false;
+                break;
+
+              case 'READY':
+              case 'ERROR':
+              case 'UNAVAILABLE':
+                _isListening = false;
+                _isThinking = false;
+                break;
+            }
+          });
+        },
+      );
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _isListening = false;
+        _isThinking = false;
+        _messages.add({
+          'role': 'ether',
+          'text': 'ETHER voice encountered an error: $error',
+        });
+      });
+
+      await _scrollBottom();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isListening = false;
+        });
+      }
+    }
   }
 
   Future<void> _speak(String text) async {
-    await _voice.speak(text);
+    await _jarvisVoice.speak(text);
   }
 
   Future<void> _scrollBottom() async {
-    await Future<void>.delayed(
-      const Duration(milliseconds: 50),
-    );
+    await Future<void>.delayed(const Duration(milliseconds: 50));
 
     if (!_scrollController.hasClients) return;
 
