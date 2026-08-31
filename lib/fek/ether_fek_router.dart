@@ -1,6 +1,5 @@
 import '../ai/brain/ether_brain.dart';
 import '../business/ether_business_operator.dart';
-import '../agent/ether_executor.dart';
 import '../agent/ether_planner.dart';
 import 'ether_fek.dart';
 import 'cognitive/ether_cognitive_fek.dart';
