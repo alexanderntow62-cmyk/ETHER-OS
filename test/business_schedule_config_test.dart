@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/business_schedule_config.dart';
+import 'package:ether_os/business/business_schedule_config.dart';
 
 void main() {
   test('ETHER schedule uses the default work window', () {

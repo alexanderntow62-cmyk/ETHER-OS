@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/business/business_research_engine.dart';
-import '../lib/business/intelligence/business_intelligence_engine.dart';
+import 'package:ether_os/business/business_research_engine.dart';
+import 'package:ether_os/business/intelligence/business_intelligence_engine.dart';
 
 void main() {
   test('business intelligence ranks the strongest opportunity first', () {

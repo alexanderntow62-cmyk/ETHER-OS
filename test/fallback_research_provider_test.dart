@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/tools/research/fallback_research_provider.dart';
-import '../lib/tools/research/research_provider.dart';
+import 'package:ether_os/tools/research/fallback_research_provider.dart';
+import 'package:ether_os/tools/research/research_provider.dart';
 
 void main() {
   test('fallback provider returns primary live result', () async {

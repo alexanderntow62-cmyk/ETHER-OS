@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/tools/research_tool.dart';
+import 'package:ether_os/tools/research_tool.dart';
 
 void main() {
   late ResearchTool tool;

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/agent/ether_planner.dart';
-import '../lib/agent/ether_executor.dart';
-import '../lib/agent/ether_task.dart';
+import 'package:ether_os/agent/ether_planner.dart';
+import 'package:ether_os/agent/ether_executor.dart';
+import 'package:ether_os/agent/ether_task.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

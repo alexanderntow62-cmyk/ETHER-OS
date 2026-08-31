@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/skills/core/ether_skill_engine.dart';
-import '../lib/tools/ether_tool_engine.dart';
+import 'package:ether_os/skills/core/ether_skill_engine.dart';
+import 'package:ether_os/tools/ether_tool_engine.dart';
 
 void main() {
   test('Skill engine exposes the research skill', () {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/business_scheduler.dart';
+import 'package:ether_os/business/business_scheduler.dart';
 
 void main() {
   test('ETHER scheduler recognizes the configured work window', () {

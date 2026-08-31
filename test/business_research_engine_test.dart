@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/business/business_research_engine.dart';
+import 'package:ether_os/business/business_research_engine.dart';
 
 void main() {
   test('ETHER researches products and selects the strongest opportunity', () {

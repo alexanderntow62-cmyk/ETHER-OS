@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/ai/ether_voice.dart';
+import 'package:ether_os/ai/ether_voice.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

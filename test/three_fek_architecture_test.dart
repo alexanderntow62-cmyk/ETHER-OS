@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/fek/ether_fek.dart';
-import '../lib/fek/ether_fek_coordinator.dart';
+import 'package:ether_os/fek/ether_fek_coordinator.dart';
 
 void main() {
   test('ETHER coordinator exposes all three primary FEKs', () {

@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import '../lib/business/business_decision_engine.dart';
-import '../lib/business/business_state.dart';
-import '../lib/business/intelligence/business_intelligence_coordinator.dart';
+import 'package:ether_os/business/business_decision_engine.dart';
+import 'package:ether_os/business/business_state.dart';
+import 'package:ether_os/business/intelligence/business_intelligence_coordinator.dart';
 
 void main() {
   test('coordinator produces intelligence from business research', () {

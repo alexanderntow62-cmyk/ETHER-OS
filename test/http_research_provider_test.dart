@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 
-import '../lib/tools/research/http_research_provider.dart';
+import 'package:ether_os/tools/research/http_research_provider.dart';
 
 void main() {
   test('HTTP research provider has correct identity', () {
