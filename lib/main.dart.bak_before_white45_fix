@@ -766,7 +766,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
                   subtitle,
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0x73FFFFFF),
+                    color: Colors.white45,
                   ),
                 ),
               ],
