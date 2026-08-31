@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'agent/ether_agent.dart';
+import 'jarvis/ether_jarvis_controller.dart';
 import 'ai/ether_voice.dart';
 
 void main() {
@@ -36,7 +36,7 @@ class EtherJarvisHome extends StatefulWidget {
 
 class _EtherJarvisHomeState extends State<EtherJarvisHome>
     with SingleTickerProviderStateMixin {
-  final EtherAgent _etherAgent = EtherAgent();
+  final EtherJarvisController _jarvis = EtherJarvisController();
   final EtherVoice _voice = EtherVoice();
 
   final TextEditingController _controller = TextEditingController();
@@ -928,7 +928,7 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
     await _scrollBottom();
 
     try {
-      final response = await _etherAgent.run(message);
+      final response = await _jarvis.execute(message);
 
       if (!mounted) return;
 
