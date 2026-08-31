@@ -21,7 +21,7 @@ void main() {
 
     final result = await engine.tryHandle('research autonomous AI');
 
-    expect(result, contains('Research tool ready for:'));
+    expect(result, contains('RESEARCH PROVIDER: LOCAL'));
     expect(result, contains('research autonomous AI'));
   });
 }
