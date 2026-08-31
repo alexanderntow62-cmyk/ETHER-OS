@@ -4,6 +4,7 @@ import 'business_decision_engine.dart';
 import 'business_permission.dart';
 import 'business_planner.dart';
 import 'business_state.dart';
+import 'intelligence/business_intelligence_coordinator.dart';
 
 enum BusinessLoopStage {
   observe,
@@ -43,12 +44,15 @@ class BusinessLoopResult {
 class EtherBusinessAutonomyLoop {
   final EtherBusinessDecisionEngine decisionEngine;
   final EtherBusinessPlanner planner;
+  final EtherBusinessIntelligenceCoordinator intelligence;
 
   EtherBusinessAutonomyLoop({
     EtherBusinessDecisionEngine? decisionEngine,
     EtherBusinessPlanner? planner,
+    EtherBusinessIntelligenceCoordinator? intelligence,
   }) : decisionEngine = decisionEngine ?? EtherBusinessDecisionEngine(),
-       planner = planner ?? EtherBusinessPlanner();
+       planner = planner ?? EtherBusinessPlanner(),
+       intelligence = intelligence ?? EtherBusinessIntelligenceCoordinator();
 
   Future<BusinessLoopResult> run({
     required String goal,
@@ -68,6 +72,16 @@ class EtherBusinessAutonomyLoop {
     // ============================================================
 
     final observation = observe(input, state);
+
+    // ============================================================
+    // FEK-3: BUSINESS INTELLIGENCE
+    // ============================================================
+    // Intelligence analyzes available research evidence.
+    // It is advisory only and cannot authorize financial actions.
+    final intelligenceReport = intelligence.createAnalysis(
+      goal: input,
+      state: state,
+    );
 
     // ============================================================
     // FEK-3: DECIDE
