@@ -13,19 +13,19 @@ void main() {
   test('FEK routes normal conversation to Core FEK', () {
     final fek = EtherFEKCoordinator();
 
-    expect(fek.route('hello ETHER'), EtherFEKType.core);
+    expect(fek.route('hello ETHER'), EtherFekType.core);
   });
 
   test('FEK routes calculator requests to Action FEK', () {
     final fek = EtherFEKCoordinator();
 
-    expect(fek.route('calculate 25 times 4'), EtherFEKType.action);
+    expect(fek.route('calculate 25 times 4'), EtherFekType.action);
   });
 
   test('FEK routes business requests to Business FEK', () {
     final fek = EtherFEKCoordinator();
 
-    expect(fek.route('create an online business'), EtherFEKType.business);
+    expect(fek.route('create an online business'), EtherFekType.business);
   });
 
   test('FEK processes calculator request', () async {

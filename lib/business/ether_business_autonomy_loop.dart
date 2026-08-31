@@ -106,6 +106,30 @@ class EtherBusinessAutonomyLoop {
     // FEK-3: PLAN
     // ============================================================
 
+    // Calculator requests are informational. FEK-3 creates the
+    // permitted calculator task for FEK-2, but does not expose
+    // its internal planning workflow to the user.
+    if (decision.type == BusinessDecisionType.calculator) {
+      final plan = EtherPlan(
+        goal: input,
+        tasks: [
+          EtherTask(
+            id: 'calculator_1',
+            goal: input,
+            type: EtherTaskType.calculator,
+          ),
+        ],
+      );
+
+      state.addGoal(input);
+
+      return BusinessLoopResult(
+        stage: BusinessLoopStage.plan,
+        plan: plan,
+        output: '',
+      );
+    }
+
     final businessPlan = planner.createPlan(input);
 
     if (businessPlan.steps.isEmpty) {

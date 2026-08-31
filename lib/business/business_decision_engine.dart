@@ -1,6 +1,7 @@
 import 'business_state.dart';
 
 enum BusinessDecisionType {
+  calculator,
   research,
   product,
   marketing,
@@ -49,7 +50,28 @@ class EtherBusinessDecisionEngine {
       );
     }
 
-    // 1. FINANCIAL ACTIONS ALWAYS HAVE HIGHEST PRIORITY.
+    // 1. CALCULATIONS / ANALYSIS.
+    // Calculations are informational and do not authorize spending.
+    if (_containsAny(input, [
+      'calculate',
+      'calculation',
+      'calculator',
+      'compute',
+      'percentage',
+      'percent',
+      'revenue minus',
+      'cost price',
+      'selling price',
+    ])) {
+      return const BusinessDecision(
+        type: BusinessDecisionType.calculator,
+        action: 'Calculate the requested business figures.',
+        reason:
+            'Calculations are informational and do not create financial commitments.',
+      );
+    }
+
+    // 2. FINANCIAL ACTIONS ALWAYS HAVE HIGHEST PRIORITY.
     if (_containsAny(input, [
       'pay',
       'payment',
