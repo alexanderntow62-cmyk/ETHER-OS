@@ -4,18 +4,22 @@ import '../business/ether_business_executor.dart';
 import 'ether_execution_guard.dart';
 import 'ether_execution_result.dart';
 
-/// FEK-2 execution engine.
-///
-/// Responsibility:
-///   1. Enforce the safety boundary.
-///   2. Dispatch business tasks.
-///   3. Dispatch local ETHER skills.
-///   4. Fall back to ETHER reasoning.
+/// FEK-2 canonical execution engine.
 ///
 /// FEK-3 decides WHAT should happen.
-/// FEK-2 decides HOW the permitted task is executed.
+/// FEK-2 decides HOW a permitted task is executed.
 ///
-/// Financial actions never pass this engine automatically.
+/// Execution order:
+///
+///   Guard
+///     ↓
+///   Business Executor
+///     ↓
+///   Local Skills
+///     ↓
+///   ETHER Brain
+///
+/// Financial actions never pass the guard automatically.
 class EtherExecutionEngine {
   final EtherBrain brain;
   final EtherBusinessExecutor businessExecutor;
@@ -25,112 +29,81 @@ class EtherExecutionEngine {
     EtherBrain? brain,
     EtherBusinessExecutor? businessExecutor,
     EtherExecutionGuard? guard,
-  })  : brain = brain ?? EtherBrain(),
-        businessExecutor =
-            businessExecutor ?? EtherBusinessExecutor(),
-        guard = guard ?? const EtherExecutionGuard();
+  }) : brain = brain ?? EtherBrain(),
+       businessExecutor = businessExecutor ?? EtherBusinessExecutor(),
+       guard = guard ?? const EtherExecutionGuard();
 
   Future<void> initialize() async {
     await brain.initialize();
   }
 
+  /// Execute exactly one pending task.
+  ///
+  /// This method does not mutate task state. The FEK-2 gateway owns
+  /// task lifecycle state so that execution results remain explicit.
   Future<EtherExecutionResult> execute(EtherTask task) async {
-    if (task.status != EtherTaskStatus.pending) {
-      return EtherExecutionResult.failed(
-        'Task ${task.id} is not pending.',
-      );
-    }
+    // FEK-2 Action owns the task lifecycle.
+    // Action FEK transitions the task from pending → running
+    // before handing it to this execution engine.
+    //
+    // Therefore the engine must not reject a task simply because
+    // its status is already running.
 
-    // HARD SAFETY BOUNDARY.
+    // ==========================================================
+    // HARD FINANCIAL SAFETY BOUNDARY
+    // ==========================================================
+
     if (guard.isFinancial(task)) {
-      return EtherExecutionResult.blocked(
-        guard.blockMessage(),
-      );
+      return EtherExecutionResult.blocked(guard.blockMessage());
     }
 
     try {
-      task.start();
+      // ========================================================
+      // TYPED SKILL EXECUTION
+      // ========================================================
+      //
+      // Explicit calculator tasks must reach the calculator skill
+      // before generic business keyword matching. This prevents
+      // words such as "profit", "margin", or "sell" from causing
+      // a calculator request to be misclassified as business work.
 
-      // Business execution gets priority over generic skills.
-      final isBusiness = _isBusinessTask(task);
+      if (task.type == EtherTaskType.calculator) {
+        final skillResult = await brain.skills.tryHandle(task.goal);
 
-      if (isBusiness) {
-        final businessResult =
-            await businessExecutor.execute(task);
-
-        if (businessResult != null) {
-          return EtherExecutionResult.completed(
-            businessResult,
-          );
+        if (skillResult != null) {
+          return EtherExecutionResult.completed(skillResult);
         }
       }
 
-      // Try a local ETHER skill.
-      final skillResult =
-          await brain.skills.tryHandle(task.goal);
+      // ========================================================
+      // BUSINESS EXECUTION
+      // ========================================================
 
-      if (skillResult != null) {
-        return EtherExecutionResult.completed(
-          skillResult,
-        );
+      final businessResult = await businessExecutor.execute(task);
+
+      if (businessResult != null) {
+        return EtherExecutionResult.completed(businessResult);
       }
 
-      // Final permitted fallback: ETHER reasoning.
+      // ========================================================
+      // LOCAL ETHER SKILLS
+      // ========================================================
+
+      final skillResult = await brain.skills.tryHandle(task.goal);
+
+      if (skillResult != null) {
+        return EtherExecutionResult.completed(skillResult);
+      }
+
+      // ========================================================
+      // ETHER REASONING FALLBACK
+      // ========================================================
+
       final result = await brain.think(task.goal);
 
       return EtherExecutionResult.completed(result);
     } catch (error) {
-      return EtherExecutionResult.failed(
-        error.toString(),
-      );
+      return EtherExecutionResult.failed(error.toString());
     }
-  }
-
-  bool _isBusinessTask(EtherTask task) {
-    if (task.isFinancial) {
-      return true;
-    }
-
-    switch (task.type) {
-      case EtherTaskType.research:
-      case EtherTaskType.product:
-      case EtherTaskType.marketing:
-      case EtherTaskType.customer:
-      case EtherTaskType.finance:
-        return true;
-
-      case EtherTaskType.general:
-      case EtherTaskType.calculator:
-      case EtherTaskType.system:
-        return _containsBusinessLanguage(
-          task.goal.toLowerCase(),
-        );
-    }
-  }
-
-  bool _containsBusinessLanguage(String input) {
-    const terms = [
-      'business',
-      'dropshipping',
-      'drop shipping',
-      'product research',
-      'market research',
-      'supplier',
-      'inventory',
-      'ecommerce',
-      'e-commerce',
-      'online store',
-      'marketing',
-      'campaign',
-      'customer',
-      'customers',
-      'sales',
-      'client',
-      'clients',
-      'youtube',
-      'content',
-    ];
-
-    return terms.any(input.contains);
   }
 }

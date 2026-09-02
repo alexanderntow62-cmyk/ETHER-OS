@@ -1,0 +1,5 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - backup_three_fek_20260829_232843/**
