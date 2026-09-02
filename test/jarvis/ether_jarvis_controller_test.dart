@@ -5,7 +5,7 @@ import 'package:ether_os/jarvis/ether_jarvis_controller.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-SharedPreferences.setMockInitialValues({});
+  SharedPreferences.setMockInitialValues({});
 
   group('EtherJarvisController', () {
     test('initializes successfully', () async {

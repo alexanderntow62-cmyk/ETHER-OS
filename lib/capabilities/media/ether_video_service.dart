@@ -10,9 +10,7 @@ class EtherVideoService {
   Future<VideoPlayerController> initializeFile(String path) async {
     await _controller?.dispose();
 
-    final controller = VideoPlayerController.file(
-      File(path),
-    );
+    final controller = VideoPlayerController.file(File(path));
 
     await controller.initialize();
 
@@ -24,9 +22,7 @@ class EtherVideoService {
   Future<VideoPlayerController> initializeUrl(String url) async {
     await _controller?.dispose();
 
-    final controller = VideoPlayerController.networkUrl(
-      Uri.parse(url),
-    );
+    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
 
     await controller.initialize();
 

@@ -7,9 +7,7 @@ import 'package:ether_os/tools/research/http_research_provider.dart';
 
 void main() {
   test('HTTP research provider has correct identity', () {
-    final provider = HttpResearchProvider(
-      client: _FakeHttpClient(),
-    );
+    final provider = HttpResearchProvider(client: _FakeHttpClient());
 
     expect(provider.name, 'http');
   });
@@ -35,9 +33,7 @@ void main() {
 
   test('HTTP research provider handles failed response', () async {
     final provider = HttpResearchProvider(
-      client: _FakeHttpClient(
-        statusCode: 500,
-      ),
+      client: _FakeHttpClient(statusCode: 500),
     );
 
     final result = await provider.research('AI');
@@ -47,9 +43,7 @@ void main() {
   });
 
   test('HTTP research provider rejects empty query', () async {
-    final provider = HttpResearchProvider(
-      client: _FakeHttpClient(),
-    );
+    final provider = HttpResearchProvider(client: _FakeHttpClient());
 
     final result = await provider.research('');
 
@@ -61,19 +55,14 @@ class _FakeHttpClient extends http.BaseClient {
   final int statusCode;
   final String responseBody;
 
-  _FakeHttpClient({
-    this.statusCode = 200,
-    this.responseBody = '{}',
-  });
+  _FakeHttpClient({this.statusCode = 200, this.responseBody = '{}'});
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     return http.StreamedResponse(
       Stream.value(utf8.encode(responseBody)),
       statusCode,
-      headers: const {
-        'content-type': 'application/json',
-      },
+      headers: const {'content-type': 'application/json'},
     );
   }
 }

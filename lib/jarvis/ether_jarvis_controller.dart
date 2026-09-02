@@ -17,8 +17,7 @@ class EtherJarvisController {
   bool _initialized = false;
   bool _busy = false;
 
-  EtherJarvisController({EtherAgent? agent})
-      : agent = agent ?? EtherAgent();
+  EtherJarvisController({EtherAgent? agent}) : agent = agent ?? EtherAgent();
 
   bool get isInitialized => _initialized;
   bool get isBusy => _busy;

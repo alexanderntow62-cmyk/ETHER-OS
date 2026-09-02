@@ -7,10 +7,8 @@ class FallbackResearchProvider implements ResearchProvider {
   final ResearchProvider primary;
   final ResearchProvider fallback;
 
-  FallbackResearchProvider({
-    required this.primary,
-    ResearchProvider? fallback,
-  }) : fallback = fallback ?? LocalResearchProvider();
+  FallbackResearchProvider({required this.primary, ResearchProvider? fallback})
+    : fallback = fallback ?? LocalResearchProvider();
 
   @override
   String get name => 'fallback';
@@ -25,11 +23,6 @@ class FallbackResearchProvider implements ResearchProvider {
 
     final localResult = await fallback.research(query);
 
-    return [
-      localResult,
-      '',
-      'PRIMARY PROVIDER STATUS',
-      result,
-    ].join('\n');
+    return [localResult, '', 'PRIMARY PROVIDER STATUS', result].join('\n');
   }
 }

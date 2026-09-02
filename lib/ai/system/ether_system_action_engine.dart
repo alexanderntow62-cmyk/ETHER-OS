@@ -4,7 +4,7 @@ class EtherSystemActionEngine {
   final EtherAndroidBridge android;
 
   EtherSystemActionEngine({EtherAndroidBridge? android})
-      : android = android ?? EtherAndroidBridge();
+    : android = android ?? EtherAndroidBridge();
 
   Future<String> execute(String input) async {
     final text = input.trim();
@@ -18,8 +18,7 @@ class EtherSystemActionEngine {
     // Known website shortcut.
     if (lower.contains('booking.com')) {
       try {
-        final opened =
-            await android.openUrl('https://www.booking.com/');
+        final opened = await android.openUrl('https://www.booking.com/');
 
         if (!opened) {
           return 'I could not open Booking.com.';
@@ -42,8 +41,7 @@ class EtherSystemActionEngine {
     if (lower.startsWith('open ')) {
       final target = text.substring(5).trim();
 
-      if (target.startsWith('http://') ||
-          target.startsWith('https://')) {
+      if (target.startsWith('http://') || target.startsWith('https://')) {
         return _openUrl(target);
       }
 

@@ -17,15 +17,18 @@ void main() {
     expect(result, 'Research query is empty.');
   });
 
-  test('local research provider does not falsely claim live research', () async {
-    final provider = LocalResearchProvider();
+  test(
+    'local research provider does not falsely claim live research',
+    () async {
+      final provider = LocalResearchProvider();
 
-    final result = await provider.research('AI business opportunities');
+      final result = await provider.research('AI business opportunities');
 
-    expect(result, contains('AI business opportunities'));
-    expect(result, contains('FALLBACK'));
-    expect(result, contains('No external research provider is configured.'));
-  });
+      expect(result, contains('AI business opportunities'));
+      expect(result, contains('FALLBACK'));
+      expect(result, contains('No external research provider is configured.'));
+    },
+  );
 
   test('research provider abstraction can be implemented', () async {
     final provider = _TestProvider();

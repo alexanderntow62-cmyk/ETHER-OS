@@ -6,9 +6,7 @@ import 'package:ether_os/tools/research/research_provider.dart';
 void main() {
   test('fallback provider returns primary live result', () async {
     final provider = FallbackResearchProvider(
-      primary: _TestProvider(
-        result: 'RESEARCH STATUS: LIVE\nLive result',
-      ),
+      primary: _TestProvider(result: 'RESEARCH STATUS: LIVE\nLive result'),
     );
 
     final result = await provider.research('AI');

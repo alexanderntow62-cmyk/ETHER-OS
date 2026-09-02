@@ -15,10 +15,7 @@ void main() {
 
     expect(report.insights, isNotEmpty);
     expect(report.bestOpportunity, isNotNull);
-    expect(
-      report.bestOpportunity!.product,
-      'Portable LED Desk Lamp',
-    );
+    expect(report.bestOpportunity!.product, 'Portable LED Desk Lamp');
   });
 
   test('coordinator identifies strongest opportunity', () {
@@ -59,10 +56,7 @@ void main() {
       requiresApproval: true,
     );
 
-    expect(
-      coordinator.requiresFinancialApproval(decision),
-      isTrue,
-    );
+    expect(coordinator.requiresFinancialApproval(decision), isTrue);
   });
 
   test('empty research remains safe', () {

@@ -32,17 +32,12 @@ class EtherVisionService {
 
     final response = await client.post(
       uri,
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
+      headers: {'Content-Type': 'application/json', 'x-goog-api-key': apiKey},
       body: jsonEncode({
         'contents': [
           {
             'parts': [
-              {
-                'text': instruction,
-              },
+              {'text': instruction},
               {
                 'inline_data': {
                   'mime_type': _mimeType(image.path),

@@ -8,20 +8,12 @@ void main() {
     final research = EtherBusinessResearchEngine();
     const intelligence = EtherBusinessIntelligenceEngine();
 
-    final report = intelligence.analyze(
-      research.researchProducts(),
-    );
+    final report = intelligence.analyze(research.researchProducts());
 
     expect(report.insights, isNotEmpty);
     expect(report.bestOpportunity, isNotNull);
-    expect(
-      report.bestOpportunity!.product,
-      'Portable LED Desk Lamp',
-    );
-    expect(
-      report.bestOpportunity!.opportunityScore,
-      76,
-    );
+    expect(report.bestOpportunity!.product, 'Portable LED Desk Lamp');
+    expect(report.bestOpportunity!.opportunityScore, 76);
   });
 
   test('high opportunity products are classified correctly', () {
@@ -40,14 +32,8 @@ void main() {
       ),
     ]);
 
-    expect(
-      report.bestOpportunity!.classification,
-      'HIGH OPPORTUNITY',
-    );
-    expect(
-      report.bestOpportunity!.recommendation,
-      contains('Prioritize'),
-    );
+    expect(report.bestOpportunity!.classification, 'HIGH OPPORTUNITY');
+    expect(report.bestOpportunity!.recommendation, contains('Prioritize'));
   });
 
   test('moderate opportunities are classified correctly', () {
@@ -66,10 +52,7 @@ void main() {
       ),
     ]);
 
-    expect(
-      report.bestOpportunity!.classification,
-      'MODERATE OPPORTUNITY',
-    );
+    expect(report.bestOpportunity!.classification, 'MODERATE OPPORTUNITY');
   });
 
   test('low opportunities are classified correctly', () {
@@ -88,10 +71,7 @@ void main() {
       ),
     ]);
 
-    expect(
-      report.bestOpportunity!.classification,
-      'LOW OPPORTUNITY',
-    );
+    expect(report.bestOpportunity!.classification, 'LOW OPPORTUNITY');
   });
 
   test('empty research produces no opportunity', () {
@@ -101,35 +81,18 @@ void main() {
 
     expect(report.insights, isEmpty);
     expect(report.bestOpportunity, isNull);
-    expect(
-      report.summary,
-      contains('No suitable opportunity identified.'),
-    );
+    expect(report.summary, contains('No suitable opportunity identified.'));
   });
 
   test('intelligence report contains expected sections', () {
     final research = EtherBusinessResearchEngine();
     const intelligence = EtherBusinessIntelligenceEngine();
 
-    final report = intelligence.analyze(
-      research.researchProducts(),
-    );
+    final report = intelligence.analyze(research.researchProducts());
 
-    expect(
-      report.summary,
-      contains('ETHER BUSINESS INTELLIGENCE'),
-    );
-    expect(
-      report.summary,
-      contains('OPPORTUNITIES ANALYZED'),
-    );
-    expect(
-      report.summary,
-      contains('TOP OPPORTUNITY'),
-    );
-    expect(
-      report.summary,
-      contains('Portable LED Desk Lamp'),
-    );
+    expect(report.summary, contains('ETHER BUSINESS INTELLIGENCE'));
+    expect(report.summary, contains('OPPORTUNITIES ANALYZED'));
+    expect(report.summary, contains('TOP OPPORTUNITY'));
+    expect(report.summary, contains('Portable LED Desk Lamp'));
   });
 }

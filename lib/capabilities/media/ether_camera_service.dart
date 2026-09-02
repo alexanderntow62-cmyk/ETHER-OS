@@ -5,8 +5,7 @@ class EtherCameraService {
 
   camera.CameraController? get controller => _controller;
 
-  bool get isInitialized =>
-      _controller?.value.isInitialized ?? false;
+  bool get isInitialized => _controller?.value.isInitialized ?? false;
 
   Future<List<camera.CameraDescription>> availableCameras() {
     return camera.availableCameras();
@@ -14,8 +13,7 @@ class EtherCameraService {
 
   Future<void> initialize({
     camera.CameraDescription? cameraDescription,
-    camera.ResolutionPreset resolution =
-        camera.ResolutionPreset.high,
+    camera.ResolutionPreset resolution = camera.ResolutionPreset.high,
   }) async {
     final cameras = await camera.availableCameras();
 
@@ -40,11 +38,8 @@ class EtherCameraService {
   Future<camera.XFile> takePhoto() async {
     final controller = _controller;
 
-    if (controller == null ||
-        !controller.value.isInitialized) {
-      throw StateError(
-        'ETHER: Camera is not initialized.',
-      );
+    if (controller == null || !controller.value.isInitialized) {
+      throw StateError('ETHER: Camera is not initialized.');
     }
 
     return controller.takePicture();
@@ -53,11 +48,8 @@ class EtherCameraService {
   Future<void> startVideoRecording() async {
     final controller = _controller;
 
-    if (controller == null ||
-        !controller.value.isInitialized) {
-      throw StateError(
-        'ETHER: Camera is not initialized.',
-      );
+    if (controller == null || !controller.value.isInitialized) {
+      throw StateError('ETHER: Camera is not initialized.');
     }
 
     if (controller.value.isRecordingVideo) {
@@ -70,17 +62,12 @@ class EtherCameraService {
   Future<camera.XFile> stopVideoRecording() async {
     final controller = _controller;
 
-    if (controller == null ||
-        !controller.value.isInitialized) {
-      throw StateError(
-        'ETHER: Camera is not initialized.',
-      );
+    if (controller == null || !controller.value.isInitialized) {
+      throw StateError('ETHER: Camera is not initialized.');
     }
 
     if (!controller.value.isRecordingVideo) {
-      throw StateError(
-        'ETHER: Video recording is not active.',
-      );
+      throw StateError('ETHER: Video recording is not active.');
     }
 
     return controller.stopVideoRecording();

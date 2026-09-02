@@ -31,9 +31,7 @@ class EtherAndroidBridge {
   }
 
   Future<bool> openSettings() async {
-    final result = await _channel.invokeMethod<bool>(
-      'openSettings',
-    );
+    final result = await _channel.invokeMethod<bool>('openSettings');
 
     return result ?? false;
   }

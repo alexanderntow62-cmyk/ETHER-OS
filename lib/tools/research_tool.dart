@@ -11,7 +11,7 @@ class ResearchTool implements EtherTool {
   final ResearchProvider provider;
 
   ResearchTool({ResearchProvider? provider})
-      : provider = provider ?? LocalResearchProvider();
+    : provider = provider ?? LocalResearchProvider();
 
   @override
   String get name => 'research';

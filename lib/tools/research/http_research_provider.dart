@@ -34,9 +34,7 @@ class HttpResearchProvider implements ResearchProvider {
     try {
       final response = await client.get(
         uri,
-        headers: const {
-          'Accept': 'application/json',
-        },
+        headers: const {'Accept': 'application/json'},
       );
 
       if (response.statusCode != 200) {
