@@ -1,6 +1,6 @@
-/// OAuth token model for ETHER-OS Google integrations.
-///
-/// This model stores token metadata only.
+// OAuth token model for ETHER-OS Google integrations.
+//
+// This model stores token metadata only.
 
 class GoogleToken {
   final String accessToken;

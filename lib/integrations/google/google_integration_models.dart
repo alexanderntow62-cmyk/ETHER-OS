@@ -1,7 +1,7 @@
-/// Core data models for ETHER-OS Google integrations.
-///
-/// This foundation contains domain models only.
-/// Network and OAuth implementations live elsewhere.
+// Core data models for ETHER-OS Google integrations.
+//
+// This foundation contains domain models only.
+// Network and OAuth implementations live elsewhere.
 
 enum GoogleService { gmail, calendar }
 

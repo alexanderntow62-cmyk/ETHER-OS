@@ -1,4 +1,4 @@
-/// Google OAuth permission and scope definitions used by ETHER-OS.
+// Google OAuth permission and scope definitions used by ETHER-OS.
 
 enum GooglePermission { gmailRead, gmailSend, calendarWrite, calendarFreeBusy }
 
