@@ -13,11 +13,16 @@ import '../ai/online/gemini_ether_engine.dart';
 import '../ai/online/ether_unavailable_ai_engine.dart';
 import '../ai/brain/ether_persistent_memory.dart';
 import '../fek/ether_fek_coordinator.dart';
+import 'v2/tasks/ether_api_task_service.dart';
+import 'v2/models/ether_api_task.dart';
+import 'v2/models/ether_api_response.dart';
 
 class EtherApiServer {
   final String host;
   final int port;
   final String apiKey;
+
+  final EtherApiTaskService taskService;
 
   HttpServer? _server;
 
@@ -31,7 +36,8 @@ class EtherApiServer {
     this.host = '127.0.0.1',
     this.port = 8787,
     this.apiKey = 'ether-local-dev-key',
-  });
+    EtherApiTaskService? taskService,
+  }) : taskService = taskService ?? EtherApiTaskService();
 
   bool get isRunning => _server != null;
 
@@ -167,6 +173,152 @@ class EtherApiServer {
         'status': 'processed',
         'response': response,
       });
+    });
+
+    // ============================================================
+    // ETHER API V2 — TASKS
+    // ============================================================
+
+    router.post('/v2/tasks', (Request request) async {
+      final body = await _body(request);
+      final description = body['description'];
+
+      if (description is! String || description.trim().isEmpty) {
+        return _json(
+          EtherApiResponse.failure(
+            type: 'validation_error',
+            error: 'description is required',
+          ).toJson(),
+          status: 400,
+        );
+      }
+
+      final task = taskService.create(description.trim());
+
+      return _json(
+        EtherApiResponse.success(
+          type: 'task_created',
+          data: task.toJson(),
+        ).toJson(),
+        status: 201,
+      );
+    });
+
+    router.get('/v2/tasks', (Request request) {
+      return _json(
+        EtherApiResponse.success(
+          type: 'task_list',
+          data: {
+            'tasks': taskService.all().map((task) => task.toJson()).toList(),
+            'count': taskService.all().length,
+          },
+        ).toJson(),
+      );
+    });
+
+    router.get('/v2/tasks/<id>', (Request request, String id) {
+      final task = taskService.get(id);
+
+      if (task == null) {
+        return _json(
+          EtherApiResponse.failure(
+            type: 'task_not_found',
+            error: 'Task not found',
+          ).toJson(),
+          status: 404,
+        );
+      }
+
+      return _json(
+        EtherApiResponse.success(type: 'task', data: task.toJson()).toJson(),
+      );
+    });
+
+    router.post('/v2/tasks/<id>/execute', (Request request, String id) async {
+      final task = taskService.get(id);
+
+      if (task == null) {
+        return _json(
+          EtherApiResponse.failure(
+            type: 'task_not_found',
+            error: 'Task not found',
+          ).toJson(),
+          status: 404,
+        );
+      }
+
+      if (task.status == EtherApiTaskStatus.completed) {
+        return _json(
+          EtherApiResponse.success(type: 'task', data: task.toJson()).toJson(),
+        );
+      }
+
+      if (task.status == EtherApiTaskStatus.cancelled) {
+        return _json(
+          EtherApiResponse.failure(
+            type: 'task_cancelled',
+            error: 'Task has been cancelled',
+          ).toJson(),
+          status: 409,
+        );
+      }
+
+      final result = await taskService.execute(
+        task,
+        () => coordinator.process(task.description),
+      );
+
+      if (result.status == EtherApiTaskStatus.failed) {
+        return _json(
+          EtherApiResponse.failure(
+            type: 'task_failed',
+            error: result.error ?? 'Task execution failed',
+          ).toJson(),
+          status: 500,
+        );
+      }
+
+      return _json(
+        EtherApiResponse.success(
+          type: 'task_completed',
+          data: result.toJson(),
+        ).toJson(),
+      );
+    });
+
+    router.post('/v2/tasks/<id>/cancel', (Request request, String id) {
+      final cancelled = taskService.cancel(id);
+
+      if (!cancelled) {
+        final task = taskService.get(id);
+
+        if (task == null) {
+          return _json(
+            EtherApiResponse.failure(
+              type: 'task_not_found',
+              error: 'Task not found',
+            ).toJson(),
+            status: 404,
+          );
+        }
+
+        return _json(
+          EtherApiResponse.failure(
+            type: 'task_not_cancellable',
+            error: 'Task cannot be cancelled in its current state',
+          ).toJson(),
+          status: 409,
+        );
+      }
+
+      final task = taskService.get(id)!;
+
+      return _json(
+        EtherApiResponse.success(
+          type: 'task_cancelled',
+          data: task.toJson(),
+        ).toJson(),
+      );
     });
 
     router.get('/v1/skills', (Request request) {
