@@ -46,3 +46,6 @@ app.*.map.json
 
 # ETHER temporary backups
 .ether_backups/
+
+# ETHER temporary backups
+.ether_backups/
