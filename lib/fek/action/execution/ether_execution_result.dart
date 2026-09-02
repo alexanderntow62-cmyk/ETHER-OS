@@ -1,26 +1,16 @@
-enum EtherExecutionStatus {
-  completed,
-  blocked,
-  failed,
-}
+enum EtherExecutionStatus { completed, blocked, failed }
 
 class EtherExecutionResult {
   final EtherExecutionStatus status;
   final String output;
 
-  const EtherExecutionResult({
-    required this.status,
-    required this.output,
-  });
+  const EtherExecutionResult({required this.status, required this.output});
 
-  bool get isCompleted =>
-      status == EtherExecutionStatus.completed;
+  bool get isCompleted => status == EtherExecutionStatus.completed;
 
-  bool get isBlocked =>
-      status == EtherExecutionStatus.blocked;
+  bool get isBlocked => status == EtherExecutionStatus.blocked;
 
-  bool get isFailed =>
-      status == EtherExecutionStatus.failed;
+  bool get isFailed => status == EtherExecutionStatus.failed;
 
   factory EtherExecutionResult.completed(String output) {
     return EtherExecutionResult(

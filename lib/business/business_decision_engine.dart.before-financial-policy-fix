@@ -72,48 +72,20 @@ class EtherBusinessDecisionEngine {
       );
     }
 
-    // 2. FINANCIAL SAFETY POLICY IS A CONSTRAINT, NOT A FINANCIAL ACTION.
-    final isFinancialSafetyPolicy = _containsAny(input, [
-      'never spend',
-      'do not spend',
-      "don't spend",
-      'no spending',
-      'without spending',
-      'zero capital',
-      'zero-capital',
-      'no capital',
-      'no upfront spending',
-      'financial safety',
-      'financial actions require approval',
-      'financial action requires approval',
-      'financial commitments require approval',
-      'financial commitments are outside autonomous authority',
-      'requires user approval',
-      'require user approval',
-      'without my approval',
-      'without explicit approval',
-    ]);
-
-    // Actual financial actions remain approval-gated.
-    if (!isFinancialSafetyPolicy &&
-        _containsAny(input, [
-          'pay',
-          'payment',
-          'purchase',
-          'buy',
-          'subscription',
-          'advertising budget',
-          'spend money',
-          'spend',
-          'withdraw',
-          'charge',
-          'order',
-          'transfer money',
-          'send money',
-          'financial transaction',
-          'make a financial commitment',
-          'make financial commitments',
-        ])) {
+    // 2. FINANCIAL ACTIONS ALWAYS HAVE HIGHEST PRIORITY.
+    if (_containsAny(input, [
+      'pay',
+      'payment',
+      'purchase',
+      'buy',
+      'subscription',
+      'advertising budget',
+      'spend money',
+      'spend',
+      'withdraw',
+      'charge',
+      'order',
+    ])) {
       return const BusinessDecision(
         type: BusinessDecisionType.finance,
         action: 'Prepare the financial action for user approval.',

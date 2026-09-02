@@ -140,28 +140,17 @@ class EtherApiServer {
         }, status: 400);
       }
 
-      try {
-        final response = await providerAI.generate(
-          message: message.trim(),
-          context: context is String ? context : null,
-        );
+      final response = await providerAI.generate(
+        message: message.trim(),
+        context: context is String ? context : null,
+      );
 
-        return _json({
-          'success': true,
-          'type': 'chat',
-          'message': message.trim(),
-          'response': response,
-        });
-      } catch (error, stackTrace) {
-        stderr.writeln('ETHER API PROVIDER ERROR: $error');
-        stderr.writeln(stackTrace);
-
-        return _json({
-          'success': false,
-          'type': 'provider_error',
-          'error': error.toString(),
-        }, status: 502);
-      }
+      return _json({
+        'success': true,
+        'type': 'chat',
+        'message': message.trim(),
+        'response': response,
+      });
     });
 
     router.post('/v1/think', (Request request) async {
