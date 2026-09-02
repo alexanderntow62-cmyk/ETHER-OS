@@ -1,11 +1,60 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+abstract class EtherMemoryStore {
+  Future<List<String>> getStringList(String key);
+  Future<void> setStringList(String key, List<String> value);
+  Future<void> remove(String key);
+}
+
+class SharedPreferencesMemoryStore implements EtherMemoryStore {
+  @override
+  Future<List<String>> getStringList(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(key) ?? <String>[];
+  }
+
+  @override
+  Future<void> setStringList(String key, List<String> value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(key, value);
+  }
+
+  @override
+  Future<void> remove(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+}
+
+class InMemoryMemoryStore implements EtherMemoryStore {
+  final Map<String, List<String>> _data = {};
+
+  @override
+  Future<List<String>> getStringList(String key) async {
+    return List<String>.from(_data[key] ?? const <String>[]);
+  }
+
+  @override
+  Future<void> setStringList(String key, List<String> value) async {
+    _data[key] = List<String>.from(value);
+  }
+
+  @override
+  Future<void> remove(String key) async {
+    _data.remove(key);
+  }
+}
+
 class EtherPersistentMemory {
   static const String _factsKey = 'ether_facts';
 
+  final EtherMemoryStore store;
+
+  EtherPersistentMemory({EtherMemoryStore? store})
+    : store = store ?? SharedPreferencesMemoryStore();
+
   Future<Map<String, String>> loadFacts() async {
-    final prefs = await SharedPreferences.getInstance();
-    final stored = prefs.getStringList(_factsKey) ?? [];
+    final stored = await store.getStringList(_factsKey);
 
     final facts = <String, String>{};
 
@@ -41,13 +90,11 @@ class EtherPersistentMemory {
   }
 
   Future<void> saveFacts(Map<String, String> facts) async {
-    final prefs = await SharedPreferences.getInstance();
-
     final stored = facts.entries
         .map((entry) => '${entry.key}|${entry.value}')
         .toList();
 
-    await prefs.setStringList(_factsKey, stored);
+    await store.setStringList(_factsKey, stored);
   }
 
   Future<void> deleteFact(String key) async {
@@ -62,7 +109,6 @@ class EtherPersistentMemory {
   }
 
   Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_factsKey);
+    await store.remove(_factsKey);
   }
 }

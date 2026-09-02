@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'jarvis/ether_jarvis_controller.dart';
 import 'jarvis/ether_jarvis_voice.dart';
+import 'api/ether_api_service.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final api = EtherApiService();
+
+  try {
+    await api.start();
+    debugPrint('ETHER API started on 127.0.0.1:8787');
+  } catch (error) {
+    debugPrint('ETHER API failed to start: $error');
+  }
+
   runApp(const EtherOS());
 }
 
@@ -696,18 +709,108 @@ class _EtherJarvisHomeState extends State<EtherJarvisHome>
                 fontStyle: thinking ? FontStyle.italic : FontStyle.normal,
               ),
             ),
+
             if (!user && !thinking) ...[
-              const SizedBox(height: 5),
-              IconButton(
-                tooltip: 'Speak',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 30, minHeight: 30),
-                icon: const Icon(
-                  Icons.volume_up_rounded,
-                  size: 17,
-                  color: Colors.white38,
-                ),
-                onPressed: () => _speak(text),
+              const SizedBox(height: 6),
+
+              Wrap(
+                spacing: 2,
+                children: [
+                  IconButton(
+                    tooltip: 'Copy',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    icon: const Icon(
+                      Icons.copy_rounded,
+                      size: 17,
+                      color: Colors.white38,
+                    ),
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: text));
+
+                      if (!mounted) return;
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('ETHER response copied'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
+
+                  IconButton(
+                    tooltip: 'Speak',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    icon: const Icon(
+                      Icons.volume_up_rounded,
+                      size: 17,
+                      color: Colors.white38,
+                    ),
+                    onPressed: () => _speak(text),
+                  ),
+
+                  IconButton(
+                    tooltip: 'Pause',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    icon: const Icon(
+                      Icons.pause_rounded,
+                      size: 19,
+                      color: Colors.white38,
+                    ),
+                    onPressed: () async {
+                      await _jarvisVoice.voice.pauseSpeaking();
+                      if (mounted) setState(() {});
+                    },
+                  ),
+
+                  IconButton(
+                    tooltip: 'Resume',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    icon: const Icon(
+                      Icons.play_arrow_rounded,
+                      size: 20,
+                      color: Colors.white38,
+                    ),
+                    onPressed: () async {
+                      await _jarvisVoice.voice.resumeSpeaking();
+                      if (mounted) setState(() {});
+                    },
+                  ),
+
+                  IconButton(
+                    tooltip: 'Stop',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
+                    icon: const Icon(
+                      Icons.stop_rounded,
+                      size: 19,
+                      color: Colors.white38,
+                    ),
+                    onPressed: () async {
+                      await _jarvisVoice.stopSpeaking();
+                      if (mounted) setState(() {});
+                    },
+                  ),
+                ],
               ),
             ],
           ],

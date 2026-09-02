@@ -1,10 +1,11 @@
 import 'ether_memory.dart';
-import '../../api/ether_api_config.dart';
 import '../system/ether_system_action_engine.dart';
 import '../intent/ether_intent_engine.dart';
 import 'ether_persistent_memory.dart';
 import '../../skills/core/ether_skill_engine.dart';
 import '../online/ether_ai_engine.dart';
+import '../online/gemini_ai_config.dart';
+import '../online/gemini_ether_engine.dart';
 
 class EtherBrain {
   final String name;
@@ -14,8 +15,6 @@ class EtherBrain {
   final EtherSkillEngine skills;
   final EtherPersistentMemory persistentMemory;
   final EtherAIEngine? onlineAI;
-
-  EtherAIEngine? get aiEngine => onlineAI;
 
   final Map<String, String> _facts = {};
 
@@ -32,7 +31,11 @@ class EtherBrain {
        systemActions = systemActions ?? EtherSystemActionEngine(),
        skills = skills ?? EtherSkillEngine(),
        persistentMemory = persistentMemory ?? EtherPersistentMemory(),
-       onlineAI = onlineAI ?? EtherApiConfig.createAIEngine();
+       onlineAI =
+           onlineAI ??
+           (GeminiAIConfig.hasGeminiKey
+               ? GeminiEtherEngine(apiKey: GeminiAIConfig.apiKey)
+               : null);
 
   Future<void> initialize() async {
     final savedFacts = await persistentMemory.loadFacts();
@@ -395,23 +398,6 @@ class EtherBrain {
     if (greetingMatch) {
       final response =
           'Hello 👋. I am $name, the intelligence core of ETHER-OS. My brain is online and ready to help.';
-      memory.rememberEther(response);
-      return response;
-    }
-
-    // Handle questions about ETHER's creator.
-    if (lower.contains('who created ether') ||
-        lower.contains('who created ether-os') ||
-        lower.contains('who built ether') ||
-        lower.contains('who built ether-os') ||
-        lower.contains('who made ether') ||
-        lower.contains('who made ether-os') ||
-        lower.contains('who is the creator of ether') ||
-        lower.contains('who is the creator of ether-os') ||
-        lower.contains('who is your creator') ||
-        lower.contains('who is your developer')) {
-      const response = 'ETHER-OS was created and developed by Alexander Ntow.';
-
       memory.rememberEther(response);
       return response;
     }

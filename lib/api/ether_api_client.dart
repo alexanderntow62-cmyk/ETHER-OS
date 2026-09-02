@@ -7,10 +7,7 @@ class EtherApiException implements Exception {
   final int? statusCode;
   final String message;
 
-  const EtherApiException({
-    this.statusCode,
-    required this.message,
-  });
+  const EtherApiException({this.statusCode, required this.message});
 
   @override
   String toString() {
@@ -30,10 +27,7 @@ class EtherApiClient {
     this.timeout = const Duration(seconds: 30),
   });
 
-  Future<dynamic> get(
-    Uri uri, {
-    Map<String, String>? headers,
-  }) async {
+  Future<dynamic> get(Uri uri, {Map<String, String>? headers}) async {
     final response = await client
         .get(uri, headers: _headers(headers))
         .timeout(timeout);
@@ -47,11 +41,7 @@ class EtherApiClient {
     Map<String, String>? headers,
   }) async {
     final response = await client
-        .post(
-          uri,
-          headers: _headers(headers),
-          body: _encodeBody(body),
-        )
+        .post(uri, headers: _headers(headers), body: _encodeBody(body))
         .timeout(timeout);
 
     return _decode(response);
@@ -63,20 +53,13 @@ class EtherApiClient {
     Map<String, String>? headers,
   }) async {
     final response = await client
-        .put(
-          uri,
-          headers: _headers(headers),
-          body: _encodeBody(body),
-        )
+        .put(uri, headers: _headers(headers), body: _encodeBody(body))
         .timeout(timeout);
 
     return _decode(response);
   }
 
-  Future<dynamic> delete(
-    Uri uri, {
-    Map<String, String>? headers,
-  }) async {
+  Future<dynamic> delete(Uri uri, {Map<String, String>? headers}) async {
     final response = await client
         .delete(uri, headers: _headers(headers))
         .timeout(timeout);
